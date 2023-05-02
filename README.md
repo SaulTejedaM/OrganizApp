@@ -6,25 +6,16 @@ This web application provides a project management web site for organizing and t
 
 ## 🔧 Software/Hardware Requierments
 
-
-| Requirement                        | Recommendation         |
-|------------------------------------|------------------------|
-| Operating System                   | Windows 7 or higher     |
-| Web Browser                        | Google Chrome          |
-| JavaScript Runtime Environment     | Node.js                |
-| Database Management System         | Firebase(Required)              |
-
-<br>
-
-| Element               | Recommendation       |
-| ---------------------| ---------------------|
-| CPU                   | 1 GHz                |
-| RAM                   | 2 GB                 |
-| Storage               | 500 MB               |
-| Resolution            | 1024x768p            |
-| Internet Connection   | Required             |
-
-
+| Component | Recommended |
+| --- | --- |
+| CPU | 2 GHz or faster |
+| RAM | 4 GB or more |
+| Storage | 1 GB or more |
+| Resolution | 1920x1080p or higher |
+| Internet Connection | Required |
+| Recommended Browser | Google Chrome |
+| Recommended JavaScript Runtime | Node.js |
+| Recommended Database Management System | Firebase|
 
 
 
