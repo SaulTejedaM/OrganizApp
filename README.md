@@ -7,7 +7,7 @@ This web application provides a project management web site for organizing and t
 ## 🔧 Software/Hardware Requierments
 <div align="center">
 
-| Component | Recommended |
+| Component | Required |
 | --- | --- |
 | CPU | 2 GHz or faster |
 | RAM | 4 GB or more |
