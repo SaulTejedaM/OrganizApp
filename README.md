@@ -5,6 +5,7 @@ This web application provides a project management web site for organizing and t
 
 
 ## 🔧 Software/Hardware Requierments
+<div align="center">
 
 | Component | Recommended |
 | --- | --- |
@@ -17,6 +18,7 @@ This web application provides a project management web site for organizing and t
 | Recommended JavaScript Runtime | Node.js |
 | Recommended Database Management System | Firebase|
 
+</div>
 
 
 
