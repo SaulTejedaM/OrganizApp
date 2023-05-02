@@ -33,7 +33,7 @@ gh repo clone saulTejeda117/OrganizApp
 
 - Click on create a shortcut on your desktop checkbox:
 
-- **This application is already connected to a Firebase WEB application**
+- **This project is already connected to a Firebase WEB application**
 
 
 
