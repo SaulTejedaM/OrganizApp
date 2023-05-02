@@ -5,11 +5,27 @@ This web application provides a project management web site for organizing and t
 
 
 ## 🔧 Software/Hardware Requierments
-- Python v.3.10 or greater
-- SO Windows 7 or greater
-- Nvidia GPU
-- WEB Cam
-- Zebra Printer
+
+
+| Requirement                        | Recommendation         |
+|------------------------------------|------------------------|
+| Operating System                   | Windows 7 or higher     |
+| Web Browser                        | Google Chrome          |
+| JavaScript Runtime Environment     | Node.js                |
+| Database Management System         | Firebase(Required)              |
+
+<br>
+
+| Element               | Recommendation       |
+| ---------------------| ---------------------|
+| CPU                   | 1 GHz                |
+| RAM                   | 2 GB                 |
+| Storage               | 500 MB               |
+| Resolution            | 1024x768p            |
+| Internet Connection   | Required             |
+
+
+
 
 
 
