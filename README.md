@@ -22,18 +22,18 @@ This web application provides a project management web site for organizing and t
 
 ## ⚙️ Instalation/Configuration Process
 
-- Download installation files from repository
-  - Download directly 'setup.zip' file 
+- Download files from repository
+  - Download directly 'public html' folder 
   
   - Or you can also clone the repository by the following command:
 ````
-git clone https://github.com/saulTejeda117/BALATAS_SUDISA.git
+gh repo clone saulTejeda117/OrganizApp
 ````
-- Extract all files and execute "setup.exe" file as administrator:
+- Extract all files and excute "index.html" on your local server
 
 - Click on create a shortcut on your desktop checkbox:
 
-- **Application will start when setting up process ends**
+- **This application is already connected to a Firebase WEB application**
 
 
 
