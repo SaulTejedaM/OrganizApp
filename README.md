@@ -33,8 +33,6 @@ gh repo clone saulTejeda117/OrganizApp
 ````
 - Extract all files and excute "index.html" on your local server
 
-- Click on create a shortcut on your desktop checkbox:
-
 - **This project is already connected to a Firebase WEB application**
 
 
