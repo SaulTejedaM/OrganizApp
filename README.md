@@ -3,7 +3,7 @@
 ## 📄 About
 
 <p align='justify'>
-This web application provides a project management web site for organizing and tracking projects. With an intuitive user interface, this site offers task management, team collaboration, and progress tracking features. In addition, Organizapp also integrates DHX Gantt, a powerful tool for generating dynamic, interactive Gantt charts that allow users to visualize project timelines and dependencies.
+This web application provides a project management web site for organizing and tracking projects. With an intuitive user interface, this site offers task management, team collaboration, and progress tracking features. In addition, Organizapp also integrates <a href='https://dhtmlx.com/docs/products/dhtmlxGantt/'>DHX Gantt</a>, a powerful tool for generating dynamic, interactive Gantt charts that allow users to visualize project timelines and dependencies.
 </p>
 
 
