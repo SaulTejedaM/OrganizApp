@@ -39,26 +39,237 @@
   </nav>
   
   <div class="nav-link logged-in">
-      <div id="gantt_here" style="width: 100%; height: 90%;position: absolute;"></div>
+    <br>
+    <button type="button" class="btn btn-primary" onclick="gantt.exportToPDF()">Download: pdf</button>
+    <button type="button" class="btn btn-primary" onclick="updateCriticalPath(this)">Critical Path</button>
+    <br>
+    <br>
+    <div id="gantt_here" style="width: 100%; height:80%;position: fixed;"></div>
+    <script>
+      gantt.plugins({
+        export_api: true,
+      });
+      gantt.plugins({
+        tooltip: true
+      });
+      gantt.plugins({
+        quick_info: true
+      });
+      gantt.plugins({
+        multiselect: true,
+        undo: true,
+      });
+      gantt.plugins({
+        keyboard_navigation: true,
+        undo: true
+      });
+      gantt.config.wide_form = 1;
 
-        <script>
+      gantt.templates.task_class = function (st, end, item) {
+        return item.$level == 0 ? "gantt_project" : ""
+      };
+
+      function toggleGrid(){
+        gantt.config.show_grid = !gantt.config.show_grid;
+        gantt.render();
+      }
+
+      gantt.config.show_empty_state = true;
 
 
-        function toggleGrid(){
-          gantt.config.show_grid = !gantt.config.show_grid;
-          gantt.render();
+      
+      gantt.attachEvent("onGanttReady", function(){
+        var tooltips = gantt.ext.tooltips;
+        tooltips.tooltip.setViewport(gantt.$task_data);
+      });
+      gantt.config.date_format = "%d-%m-%Y";
+      gantt.config.scale_height = 50;
+      gantt.config.scales = [
+        {unit: "month", step: 1, format: "%F, %Y"},
+        {unit: "day", step: 1, format: "%j, %D"}
+      ];
+
+
+      gantt.plugins({
+        critical_path: true
+      });
+
+      function updateCriticalPath(toggle) {
+      toggle.enabled = !toggle.enabled;
+      if (toggle.enabled) {
+        toggle.innerHTML = "Hide Critical Path";
+        gantt.config.highlight_critical_path = true;
+        gantt.eachTask(function (task) {
+          if (this.isCriticalTask(task) && !this.isTaskVisible(task)) {
+            var parent;
+            while (gantt.isTaskExists(task.parent)) {
+              parent = this.getTask(task.parent);
+              if (this.isTaskVisible(parent.id)) {
+                parent.$open = true;
+                break;
+              } else {
+                if (!parent.open)
+                  parent.$open = true;
+                parent = this.getTask(parent.parent);
+              }
+            }
+          }
+        });
+      } else {
+        toggle.innerHTML = "Expand critical tasks";
+        gantt.config.highlight_critical_path = false;
+      }
+      gantt.render();
+    }
+
+
+    
+      gantt.serverList("staff", [
+        {key: 1, label: "John", backgroundColor:"#03A9F4", textColor:"#FFF"},
+        {key: 2, label: "Mike", backgroundColor:"#f57730", textColor:"#FFF"},
+        {key: 3, label: "Anna", backgroundColor:"#e157de", textColor:"#FFF"},
+        {key: 4, label: "Bill", backgroundColor:"#78909C", textColor:"#FFF"},
+        {key: 7, label: "Floe", backgroundColor:"#8D6E63", textColor:"#FFF"}
+      ]);
+    
+      gantt.serverList("priority", [
+        {key: 1, label: "High"},
+        {key: 2, label: "Normal"},
+        {key: 3, label: "Low"}
+      ]);
+    
+      // end test data
+      gantt.config.grid_width = 500;
+      gantt.config.grid_resize = true;
+      gantt.config.open_tree_initially = true;
+    
+      var labels = gantt.locale.labels;
+
+      var textEditor = {type: "text", map_to: "text"};
+      var dateEditor = {type: "date", map_to: "start_date", min: new Date(2023, 0, 1), max: new Date(2024, 0, 1)};
+      var durationEditor = {type: "number", map_to: "duration", min:0, max: 100};
+      var priority = {type: "select", map_to: "priority", options:gantt.serverList("priority")};
+
+      labels.column_priority = labels.section_priority = "Priority";
+      labels.column_owner = labels.section_owner = "Owner";
+    
+      function byId(list, id) {
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].key == id)
+            return list[i].label || "";
         }
-
-        gantt.config.show_empty_state = true;
-
-        gantt.config.start_date = new Date(2025, 04, 01);
-        gantt.config.end_date = new Date(2025, 05, 01);
-        gantt.init("gantt_here");
-
-      </script>
-
-
+        return "";
+      }
+    
+      gantt.config.columns = [
+        {name: "owner", width: 80, align: "center", template: function (item) {
+            return byId(gantt.serverList('staff'), item.owner_id)}},
+        {name: "text", label: "Task name", tree: true, width: '80'},
+        {name: "duration", width: 60, align: "center"},
+        {name: "priority", width: 80, align: "center", template: function (item) {
+            return byId(gantt.serverList('priority'), item.priority)}},
+        {name: "add", width: 40}
+      ];
+    
+      gantt.config.lightbox.sections = [
+        {name: "description", height: 38, map_to: "text", type: "textarea", focus: true},
+        {name: "priority", height: 22, map_to: "priority", type: "select", options: gantt.serverList("priority")},
+        {name: "owner", height: 22, map_to: "owner_id", type: "select", options: gantt.serverList("staff")},
+        {name: "time", type: "duration", map_to: "auto"}
+      ];
+    
+      gantt.templates.rightside_text = function(start, end, task){
+        return byId(gantt.serverList('staff'), task.owner_id);
+      };
+    
+      gantt.templates.grid_row_class =
+        gantt.templates.task_row_class =
+          gantt.templates.task_class = function (start, end, task) {
+        var css = [];
+        if (task.$virtual || task.type == gantt.config.types.project)
+          css.push("summary-bar");
+    
+        if(task.owner_id){
+          css.push("gantt_resource_task gantt_resource_" + task.owner_id);
+        }
+    
+        return css.join(" ");
+      };
+    
+      gantt.attachEvent("onParse", function(){
+        var styleId = "dynamicGanttStyles";
+        var element = document.getElementById(styleId);
+        if(!element){
+          element = document.createElement("style");
+          element.id = styleId;
+          document.querySelector("head").appendChild(element);
+        }
+        var html = [];
+        var resources = gantt.serverList("staff");
+    
+        resources.forEach(function(r){
+          html.push(".gantt_task_line.gantt_resource_" + r.key + "{" +
+            "background-color:"+r.backgroundColor+"; " +
+            "color:"+r.textColor+";" +
+          "}");
+          html.push(".gantt_row.gantt_resource_" + r.key + " .gantt_cell:nth-child(1) .gantt_tree_content{" +
+            "background-color:"+r.backgroundColor+"; " +
+            "color:"+r.textColor+";" +
+            "}");
+        });
+        element.innerHTML = html.join("");
+      });
+      gantt.templates.task_class = function (start, end, task) {
+        switch (task.priority) {
+          case "1":
+            return "high";
+            break;
+          case "2":
+            return "medium";
+            break;
+          case "3":
+            return "low";
+            break;
+        }
+      };
+      gantt.init("gantt_here");
+      gantt.parse(taskData);
+      gantt.showLightbox(1);
+    
+    
+    </script>
   </div>
+  <script>
+    function saveData() {
+      // Obtener los datos de Gantt
+      var data = gantt.serialize();
+      
+      // Convertir los datos en formato JSON
+      var json = JSON.stringify(data);
+      
+      // Crear un objeto Blob para guardar los datos en un archivo
+      var blob = new Blob([json], {type: "application/json"});
+      
+      // Crear una URL para el archivo Blob
+      var url = URL.createObjectURL(blob);
+      
+      // Crear un enlace para descargar el archivo
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "gantt_data.json";
+      document.body.appendChild(a);
+      
+      // Hacer clic en el enlace para descargar el archivo
+      a.click();
+      
+      // Limpiar el enlace y la URL
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+
+
+
 
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>

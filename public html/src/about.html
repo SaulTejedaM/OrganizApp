@@ -85,12 +85,15 @@
             <center>
               <a href="/">Forgot your password?</a>
             </center>
+  
+
+ 
           </form>
         </div>
       </div>
     </div>
   </div>
-  <div class="container p-4">
+  <div style="background-color: rgba(144,197,65,255);">
     <div class="row">
       <div class="col-md-6 offset-md-3">
         <ul class="list-group posts">
@@ -99,17 +102,49 @@
     </div>
   </div>
 
+
   <div class="nav-link logged-in">
     <center>
-      <h1>Welcome!</h1>
-      
+      <h1>Welcome to OrganizApp!</h1>
     </center>
   </div>
 
   <div class="nav-link logged-out">
     <center>
-      <h1>What's OrganizApp?</h1>
       
+      <div id="carousel" style="background-color:rgb(196,204,188);">
+        <br>
+        <img src="src/img/3.jpg" alt="Image 3" style="width: 60%; height: 45%;">
+        <br>
+      </div>
+      <br>
+      <script>
+        var currentImage = 0;
+        var images = document.querySelectorAll("#carousel img");
+      
+        function prevImage() {
+          images[currentImage].style.display = "none";
+          currentImage--;
+          if (currentImage < 0) {
+            currentImage = images.length - 1;
+          }
+          images[currentImage].style.display = "block";
+        }      
+        function nextImage() {
+          images[currentImage].style.display = "none";
+          currentImage++;
+          if (currentImage >= images.length) {
+            currentImage = 0;
+          }
+          images[currentImage].style.display = "block";
+        }
+      
+        // Mostrar la primera imagen al cargar la página
+        images[currentImage].style.display = "block";
+      </script>
+
+      <h1>What's OrganizApp?</h1>
+      <p style="text-align: justify; margin: 0 auto; width: 40%;">Organizapp is a project management and personnel administration platform. Organizapp provides solutions for project planning, tracking, time management, and human resources management. Discover our features and start improving your team and project management today!</p>
     </center>
     
   </div>
