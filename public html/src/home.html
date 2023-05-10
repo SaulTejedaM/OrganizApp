@@ -23,7 +23,6 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav ms-auto">
-          <a class="nav-link logged-out" href="about.html">About</a>
           <a class="nav-link logged-out" href="#" data-bs-toggle="modal" data-bs-target="#signinModal">Login</a>
           <a class="nav-link logged-out" href="#" data-bs-toggle="modal" data-bs-target="#signupModal">Signup</a>
 
@@ -57,9 +56,9 @@
             <input type="password" id="signup-password" class="form-control mb-3" placeholder="Password" required>
             
             <button type="submit" class="btn btn-success w-100 mb-4">Send</button>
-            <button type="button" class="btn btn-info w-30" id="googleLogin">Google</button>
-            <button type="button" class="btn btn-primary w-30" id="facebookLogin">Facebook</button>
-            <button type="button" class="btn btn-dark w-30" id="githubLogin">Github</button>
+            <button type="button" class="btn btn-info w-30%" style="width: 33%;" id="googleLogin">Google</button>
+            <button type="button" class="btn btn-primary w-30%" style="width: 32%;" id="facebookLogin">Facebook</button>
+            <button type="button" class="btn btn-dark w-30" style="width: 32%;" id="githubLogin">Github</button>
           </form>
         </div>
       </div>
@@ -90,7 +89,7 @@
       </div>
     </div>
   </div>
-  <div class="container p-4">
+  <div style="background-color: rgba(144,197,65,255);">
     <div class="row">
       <div class="col-md-6 offset-md-3">
         <ul class="list-group posts">
@@ -108,7 +107,38 @@
 
   <div class="nav-link logged-out">
     <center>
+      <div id="carousel" style="background-color:rgb(196,204,188);">
+        <br>
+        <img src="src/img/3.jpg" alt="Image 3" style="width: 60%; height: 45%;">
+        <br>
+      </div>
+      <br>
+      <script>
+        var currentImage = 0;
+        var images = document.querySelectorAll("#carousel img");
+      
+        function prevImage() {
+          images[currentImage].style.display = "none";
+          currentImage--;
+          if (currentImage < 0) {
+            currentImage = images.length - 1;
+          }
+          images[currentImage].style.display = "block";
+        }      
+        function nextImage() {
+          images[currentImage].style.display = "none";
+          currentImage++;
+          if (currentImage >= images.length) {
+            currentImage = 0;
+          }
+          images[currentImage].style.display = "block";
+        }
+      
+        // Mostrar la primera imagen al cargar la página
+        images[currentImage].style.display = "block";
+      </script>
       <h1>What's OrganizApp?</h1>
+      <p style="text-align: justify; margin: 0 auto; width: 40%;">Organizapp is a project management and personnel administration platform. Organizapp provides solutions for project planning, tracking, time management, and human resources management. Discover our features and start improving your team and project management today!</p>
       
     </center>
     
