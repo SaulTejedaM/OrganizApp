@@ -10,9 +10,7 @@
   <!-- Toastify CSS -->
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
-
 <body>
-
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
     <div class="container">
@@ -35,8 +33,6 @@
       </div>
     </div>
   </nav>
-
-
   <!-- Modal -->
   <div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
@@ -65,7 +61,7 @@
     </div>
   </div>
 
-  <div class="modal fade" id="signinModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalSignin"
+  <!-- <div class="modal fade" id="signinModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalSignin"
     aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -88,7 +84,114 @@
         </div>
       </div>
     </div>
+  </div> -->
+
+  <div class="modal fade" id="signinModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalSignin"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          
+          <button type="button" class="btn-close btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          
+          <form id="login-form">
+            <h3>LogIn</h3>
+            <label for="email">Email</label>
+            <input type="text" id="login-email" class="form-control mb-3" placeholder="Email" required>
+            <label for="password">Password:</label>
+            <input type="password" id="login-password" class="form-control mb-3" placeholder="Password" required>
+            <button type="submit" class="btn btn-success w-100 mb-4">Login</button>
+            <center>
+            <a href="#" id="forgot-password-link">Forgot your password?</a>
+            </center>
+          </form>
+          <form id="forgot-password-form" style="display: none;">
+            <h3>Forgot your password?</h3>
+            <label for="email">Email</label>
+            <input type="text" id="forgot-password-email" class="form-control mb-3" placeholder="Email" required>
+            <button type="submit" class="btn btn-success w-100 mb-4">Send</button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+  <script>
+
+  const loginForm = document.getElementById('login-form');
+  const forgotPasswordForm = document.getElementById('forgot-password-form');
+  const forgotPasswordLink = document.getElementById('forgot-password-link');
+  const signinModal = document.getElementById('signinModal');
+
+// Agregar un controlador de eventos para el enlace 'Forgot your password?'
+  forgotPasswordLink.addEventListener('click', () => {
+    // Ocultar el formulario de inicio de sesión
+    loginForm.style.display = 'none';
+    // Mostrar el formulario 'Forgot password'
+    forgotPasswordForm.style.display = 'block';
+  });
+
+// Agregar un controlador de eventos para el botón de cerrar el modal
+signinModal.addEventListener('hidden.bs.modal', () => {
+  // Mostrar el formulario de inicio de sesión
+  loginForm.style.display = 'block';
+  // Ocultar el formulario 'Forgot password'
+  forgotPasswordForm.style.display = 'none';
+});
+
+
+const firebaseConfig = {
+        apiKey: "AIzaSyD5e7ZJ4IJlxUOezr7SyGWxeIE2fe_jWuY",
+        authDomain: "organizapp-6c914.firebaseapp.com",
+        projectId: "organizapp-6c914",
+        storageBucket: "organizapp-6c914.appspot.com",
+        messagingSenderId: "447288139021",
+        appId: "1:447288139021:web:a72ec9d1a44319972da444"
+      };
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// Agregar un controlador de eventos para el botón 'Send' en el formulario de recuperación de contraseña
+forgotPasswordForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const email = document.getElementById('forgot-password-email').value;
+  // Verificar que el correo exista en la base de datos de Firebase Auth
+  auth.sendPasswordResetEmail(email)
+    .then(() => {
+      Toastify({
+              text: 'Se ha enviado un correo para restablecer la contraseña',
+              backgroundColor: '#ffc371',
+              className: 'error',
+              position: 'right',
+              duration: 1000
+            }).showToast();
+      // alert('Se ha enviado un correo para restablecer la contraseña');
+      // Ocultar el formulario 'Forgot password'
+      forgotPasswordForm.style.display = 'none';
+      // Mostrar el formulario de inicio de sesión
+      loginForm.style.display = 'block';
+    })
+    .catch((error) => {
+      Toastify({
+        text: 'Error al enviar sus datos',
+        backgroundColor: '#ff5f6d',
+        className: 'error',
+        position: 'right',
+        duration: 3000
+      }).showToast();
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorCode, errorMessage);
+    });
+});
+  </script>
+
+  
   <div style="background-color: rgba(144,197,65,255);">
     <div class="row">
       <div class="col-md-6 offset-md-3">
@@ -101,7 +204,6 @@
   <div class="nav-link logged-in">
     <center>
       <h1>Welcome!</h1>
-      
     </center>
   </div>
 
@@ -148,6 +250,7 @@
   <!-- Toastify js -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="./main.js" type="module"></script>
+
 </body>
 
 </html>

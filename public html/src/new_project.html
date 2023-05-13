@@ -32,7 +32,7 @@
           <a class="nav-link logged-in" href="projects.html">Projects</a>
           <a class="nav-link logged-in" href="#">Teammates</a>
           <a class="nav-link logged-in" href="#">Settings</a>
-          <a class="nav-link logged-in" href="home.html" id="logout">Logout</a>
+          <a class="nav-link logged-in" href="home.html#" id="logout">Logout</a>
         </div>
       </div>
     </div>
@@ -48,9 +48,9 @@
           <br><br>
           <button type="button" style="width: 100%;" class="btn btn-primary" onclick="gantt.exportToPDF()">Download: pdf</button>
           <br><br>
-          <button type="button" style="width: 100%;" class="btn btn-primary" onclick="gantt.exportToPDF()">Download: png</button>
+          <button type="button" style="width: 100%;" class="btn btn-primary" onclick="gantt.exportToPNG()">Download: png</button>
           <br><br>
-          <button type="button" style="width: 100%;" class="btn btn-success">Save</button>
+          <button type="button" style="width: 100%;" class="btn btn-success" onclick="saveData()">Save</button>
         </div>
         <div class="col-md-10">
           <br>
@@ -62,6 +62,10 @@
 
     <br>
     <br>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Toastify js -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="./main.js" type="module"></script>
    
     <script>
       gantt.plugins({
@@ -253,47 +257,81 @@
       gantt.init("gantt_here");
       gantt.parse(taskData);
       gantt.showLightbox(1);
-    
-    
+
+
+      function saveProjects() {
+        // Get the data from the Gantt chart
+        var data = gantt.serialize();
+
+        // Convert the data to JSON format
+        var json = JSON.stringify(data);
+
+        // Save the data to Firebase
+        var user = firebase.auth().currentUser;
+        if (user) {
+          var db = firebase.firestore();
+          var docRef = db.collection("projects").doc(user.uid);
+          docRef.set({
+            data: json
+          })
+          .then(function() {
+            console.log("Projects saved to Firebase");
+          })
+          .catch(function(error) {
+            console.error("Error saving projects to Firebase: ", error);
+          });
+        } else {
+          console.error("User not logged in");
+        }
+      }
+      
+      
     </script>
   </div>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
   <script>
-    function saveData() {
-      // Obtener los datos de Gantt
-      var data = gantt.serialize();
-      
-      // Convertir los datos en formato JSON
-      var json = JSON.stringify(data);
-      
-      // Crear un objeto Blob para guardar los datos en un archivo
-      var blob = new Blob([json], {type: "application/json"});
-      
-      // Crear una URL para el archivo Blob
-      var url = URL.createObjectURL(blob);
-      
-      // Crear un enlace para descargar el archivo
-      var a = document.createElement("a");
-      a.href = url;
-      a.download = "gantt_data.json";
-      document.body.appendChild(a);
-      
-      // Hacer clic en el enlace para descargar el archivo
-      a.click();
-      
-      // Limpiar el enlace y la URL
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-  </script>
-
-
-
-
-  <!-- SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Toastify js -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-  <script src="./main.js" type="module"></script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyD5e7ZJ4IJlxUOezr7SyGWxeIE2fe_jWuY",
+        authDomain: "organizapp-6c914.firebaseapp.com",
+        projectId: "organizapp-6c914",
+        storageBucket: "organizapp-6c914.appspot.com",
+        messagingSenderId: "447288139021",
+        appId: "1:447288139021:web:a72ec9d1a44319972da444"
+      };
+      firebase.initializeApp(firebaseConfig);
+      function saveData() {
+        var data = gantt.serialize();
+        var id = data.data[0].id;
+        var data = JSON.stringify(data);
+        console.log(id);
+        const database = firebase.database();
+        database.ref('proyectos/'+ id).set(data);
+        const projectRef = database.ref('proyectos/'+ id); 
+        projectRef.set(data, function(error) {
+          if (error) {
+            Toastify({
+              text: 'Error al guardar los datos',
+              backgroundColor: '#ff5f6d',
+              className: 'error',
+              position: 'right',
+              duration: 3000
+            }).showToast();
+          } else {
+            Toastify({
+              text: 'Datos Guardados Exitosamente',
+              backgroundColor: '#ffc371',
+              className: 'error',
+              position: 'right',
+              duration: 3000
+            }).showToast();
+          }
+        });
+        
+      }
+      setInterval(saveData, 30000);
+    </script>
 
 </body>
 
