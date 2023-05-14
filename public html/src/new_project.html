@@ -301,14 +301,33 @@
         appId: "1:447288139021:web:a72ec9d1a44319972da444"
       };
       firebase.initializeApp(firebaseConfig);
+      function get_uid() {
+        var name = "uid=";
+        var decoded_cookie = decodeURIComponent(document.cookie);
+        var cookie_array = decoded_cookie.split(';');
+        for(var i = 0; i < cookie_array.length; i++) {
+          var cookie = cookie_array[i];
+          while (cookie.charAt(0) == ' ') {
+            cookie = cookie.substring(1);
+          }
+          if (cookie.indexOf(name) == 0) {
+            return cookie.substring(name.length, cookie.length);
+          }
+        }
+        return "";
+      }
+
+      
+
       function saveData() {
         var data = gantt.serialize();
         var id = data.data[0].id;
         var data = JSON.stringify(data);
         console.log(id);
         const database = firebase.database();
-        database.ref('proyectos/'+ id).set(data);
-        const projectRef = database.ref('proyectos/'+ id); 
+        const userID = get_uid("userID");
+        const projectRef = database.ref('proyectos/'+userID+'/'+ id);
+
         projectRef.set(data, function(error) {
           if (error) {
             Toastify({
