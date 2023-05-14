@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects</title>
+  <!-- BOOSTRAP CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css">
+  <!-- Toastify CSS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+  <script src="../../codebase/dhtmlxgantt.js?v=8.0.1"></script>
+  <link rel="stylesheet" href="../../codebase/dhtmlxgantt.css?v=8.0.1">
+  <link rel="stylesheet" href="../common/controls_styles.css?v=7.1.7">
+
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="home.html">OrganizApp</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link logged-in" href="#">Profile</a>
+          <a class="nav-link logged-in" href="projects.html">Projects</a>
+          <a class="nav-link logged-in" href="#">Teammates</a>
+          <a class="nav-link logged-in" href="#">Settings</a>
+          <a class="nav-link logged-in" href="home.html#" id="logout">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="nav-link logged-in">
+    <br>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-2">
+          <br>
+          <button type="button" style="width: 100%;" class="btn btn-primary" onclick="updateCriticalPath(this)">Show Critical Path</button>
+          <br><br>
+          <button type="button" style="width: 100%;" class="btn btn-primary" onclick="gantt.exportToPDF()">Download: pdf</button>
+          <br><br>
+          <button type="button" style="width: 100%;" class="btn btn-primary" onclick="gantt.exportToPNG()">Download: png</button>
+          <br><br>
+          <button type="button" style="width: 100%;" class="btn btn-success" onclick="saveData()">Save</button>
+        </div>
+        <div class="col-md-10">
+          <br>
+          <div id="gantt_here" style="width: 80%; height:80%;position: absolute;"></div>     
+        </div>
+      </div>
+    </div>
+
+
+    <br>
+    <br>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Toastify js -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <!-- <script src="./main.js" type="module"></script> -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>  
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>  
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+   
+    <script>
+      
+      gantt.plugins({
+        export_api: true,
+      });
+      gantt.plugins({
+        tooltip: true
+      });
+      gantt.plugins({
+        quick_info: true
+      });
+      gantt.plugins({
+        multiselect: true,
+        undo: true,
+      });
+      gantt.plugins({
+        keyboard_navigation: true,
+        undo: true
+      });
+      gantt.config.wide_form = 1;
+
+      gantt.templates.task_class = function (st, end, item) {
+        return item.$level == 0 ? "gantt_project" : ""
+      };
+
+      function toggleGrid(){
+        gantt.config.show_grid = !gantt.config.show_grid;
+        gantt.render();
+      }
+
+      gantt.attachEvent("onGanttReady", function(){
+        var tooltips = gantt.ext.tooltips;
+        tooltips.tooltip.setViewport(gantt.$task_data);
+      });
+      gantt.config.date_format = "%d-%m-%Y";
+      gantt.config.scale_height = 50;
+      gantt.config.scales = [
+        {unit: "month", step: 1, format: "%F, %Y"},
+        {unit: "day", step: 1, format: "%j, %D"}
+      ];
+
+
+      gantt.plugins({
+        critical_path: true
+      });
+
+      function updateCriticalPath(toggle) {
+      toggle.enabled = !toggle.enabled;
+      if (toggle.enabled) {
+        toggle.innerHTML = "Hide Critical Path";
+        gantt.config.highlight_critical_path = true;
+        gantt.eachTask(function (task) {
+          if (this.isCriticalTask(task) && !this.isTaskVisible(task)) {
+            var parent;
+            while (gantt.isTaskExists(task.parent)) {
+              parent = this.getTask(task.parent);
+              if (this.isTaskVisible(parent.id)) {
+                parent.$open = true;
+                break;
+              } else {
+                if (!parent.open)
+                  parent.$open = true;
+                parent = this.getTask(parent.parent);
+              }
+            }
+          }
+        });
+      } else {
+        toggle.innerHTML = "Expand critical tasks";
+        gantt.config.highlight_critical_path = false;
+      }
+      gantt.render();
+    }
+
+
+    
+      gantt.serverList("staff", [
+        {key: 1, label: "John", backgroundColor:"#03A9F4", textColor:"#FFF"},
+        {key: 2, label: "Mike", backgroundColor:"#f57730", textColor:"#FFF"},
+        {key: 3, label: "Anna", backgroundColor:"#e157de", textColor:"#FFF"},
+        {key: 4, label: "Bill", backgroundColor:"#78909C", textColor:"#FFF"},
+        {key: 7, label: "Floe", backgroundColor:"#8D6E63", textColor:"#FFF"}
+      ]);
+    
+      gantt.serverList("priority", [
+        {key: 1, label: "High"},
+        {key: 2, label: "Normal"},
+        {key: 3, label: "Low"}
+      ]);
+    
+      // end test data
+      gantt.config.grid_width = 500;
+      gantt.config.grid_resize = true;
+      gantt.config.open_tree_initially = true;
+    
+      var labels = gantt.locale.labels;
+
+      var textEditor = {type: "text", map_to: "text"};
+      var dateEditor = {type: "date", map_to: "start_date", min: new Date(2023, 0, 1), max: new Date(2024, 0, 1)};
+      var durationEditor = {type: "number", map_to: "duration", min:0, max: 100};
+      var priority = {type: "select", map_to: "priority", options:gantt.serverList("priority")};
+
+      labels.column_priority = labels.section_priority = "Priority";
+      labels.column_owner = labels.section_owner = "Owner";
+    
+      function byId(list, id) {
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].key == id)
+            return list[i].label || "";
+        }
+        return "";
+      }
+    
+      gantt.config.columns = [
+        {name: "owner", width: 80, align: "center", template: function (item) {
+            return byId(gantt.serverList('staff'), item.owner_id)}},
+        {name: "text", label: "Task name", tree: true, width: '80'},
+        {name: "duration", width: 60, align: "center"},
+        {name: "priority", width: 80, align: "center", template: function (item) {
+            return byId(gantt.serverList('priority'), item.priority)}},
+        {name: "add", width: 40}
+      ];
+    
+      gantt.config.lightbox.sections = [
+        {name: "description", height: 38, map_to: "text", type: "textarea", focus: true},
+        {name: "priority", height: 22, map_to: "priority", type: "select", options: gantt.serverList("priority")},
+        {name: "owner", height: 22, map_to: "owner_id", type: "select", options: gantt.serverList("staff")},
+        {name: "time", type: "duration", map_to: "auto"}
+      ];
+    
+      gantt.templates.rightside_text = function(start, end, task){
+        return byId(gantt.serverList('staff'), task.owner_id);
+      };
+    
+      gantt.templates.grid_row_class =
+        gantt.templates.task_row_class =
+          gantt.templates.task_class = function (start, end, task) {
+        var css = [];
+        if (task.$virtual || task.type == gantt.config.types.project)
+          css.push("summary-bar");
+    
+        if(task.owner_id){
+          css.push("gantt_resource_task gantt_resource_" + task.owner_id);
+        }
+    
+        return css.join(" ");
+      };
+    
+      gantt.attachEvent("onParse", function(){
+        var styleId = "dynamicGanttStyles";
+        var element = document.getElementById(styleId);
+        if(!element){
+          element = document.createElement("style");
+          element.id = styleId;
+          document.querySelector("head").appendChild(element);
+        }
+        var html = [];
+        var resources = gantt.serverList("staff");
+    
+        resources.forEach(function(r){
+          html.push(".gantt_task_line.gantt_resource_" + r.key + "{" +
+            "background-color:"+r.backgroundColor+"; " +
+            "color:"+r.textColor+";" +
+          "}");
+          html.push(".gantt_row.gantt_resource_" + r.key + " .gantt_cell:nth-child(1) .gantt_tree_content{" +
+            "background-color:"+r.backgroundColor+"; " +
+            "color:"+r.textColor+";" +
+            "}");
+        });
+        element.innerHTML = html.join("");
+      });
+      gantt.templates.task_class = function (start, end, task) {
+        switch (task.priority) {
+          case "1":
+            return "high";
+            break;
+          case "2":
+            return "medium";
+            break;
+          case "3":
+            return "low";
+            break;
+        }
+      };
+      function get_uid() {
+      var name = "uid=";
+      var decoded_cookie = decodeURIComponent(document.cookie);
+      var cookie_array = decoded_cookie.split(';');
+      for(var i = 0; i < cookie_array.length; i++) {
+        var cookie = cookie_array[i];
+        while (cookie.charAt(0) == ' ') {
+          cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(name) == 0) {
+          return cookie.substring(name.length, cookie.length);
+        }
+      }
+      return "";
+    }
+    function get_pid() {
+      var name = "pid=";
+      var decoded_cookie = decodeURIComponent(document.cookie);
+      var cookie_array = decoded_cookie.split(';');
+      for(var i = 0; i < cookie_array.length; i++) {
+        var cookie = cookie_array[i];
+        while (cookie.charAt(0) == ' ') {
+          cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(name) == 0) {
+          return cookie.substring(name.length, cookie.length);
+        }
+      }
+      return "";
+    }
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5e7ZJ4IJlxUOezr7SyGWxeIE2fe_jWuY",
+        authDomain: "organizapp-6c914.firebaseapp.com",
+        projectId: "organizapp-6c914",
+        storageBucket: "organizapp-6c914.appspot.com",
+        messagingSenderId: "447288139021",
+        appId: "1:447288139021:web:a72ec9d1a44319972da444"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const database = firebase.database();
+      const userID = get_uid();
+      const projectID = get_pid();
+      const projectRef = database.ref('proyectos/'+userID+'/'+projectID);
+
+      projectRef.once('value', function(snapshot) {
+        const taskData = snapshot.val();
+        gantt.init("gantt_here");
+        gantt.parse(taskData);
+      });
+      gantt.init("gantt_here");
+      // gantt.parse(taskData);
+
+
+      function saveProjects() {
+        // Get the data from the Gantt chart
+        var data = gantt.serialize();
+
+        // Convert the data to JSON format
+        var json = JSON.stringify(data);
+
+        // Save the data to Firebase
+        var user = firebase.auth().currentUser;
+        if (user) {
+          var db = firebase.firestore();
+          var docRef = db.collection("projects").doc(user.uid);
+          docRef.set({
+            data: json
+          })
+          .then(function() {
+            console.log("Projects saved to Firebase");
+          })
+          .catch(function(error) {
+            console.error("Error saving projects to Firebase: ", error);
+          });
+        } else {
+          console.error("User not logged in");
+        }
+      }
+    </script>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+  <script>
+      
+      firebase.initializeApp(firebaseConfig);
+      function get_uid() {
+        var name = "uid=";
+        var decoded_cookie = decodeURIComponent(document.cookie);
+        var cookie_array = decoded_cookie.split(';');
+        for(var i = 0; i < cookie_array.length; i++) {
+          var cookie = cookie_array[i];
+          while (cookie.charAt(0) == ' ') {
+            cookie = cookie.substring(1);
+          }
+          if (cookie.indexOf(name) == 0) {
+            return cookie.substring(name.length, cookie.length);
+          }
+        }
+        return "";
+      }
+      function saveData() {
+        var data = gantt.serialize();
+        var id = data.data[0].id;
+        var data = JSON.stringify(data);
+        console.log(id);
+        const database = firebase.database();
+        const userID = get_uid("userID");
+        const projectRef = database.ref('proyectos/'+userID+'/'+ id);
+
+        projectRef.set(data, function(error) {
+          if (error) {
+            Toastify({
+              text: 'Error al guardar los datos',
+              backgroundColor: '#ff5f6d',
+              className: 'error',
+              position: 'right',
+              duration: 3000
+            }).showToast();
+          } else {
+            Toastify({
+              text: 'Datos Guardados Exitosamente',
+              backgroundColor: '#ffc371',
+              className: 'error',
+              position: 'right',
+              duration: 3000
+            }).showToast();
+          }
+        });
+        
+      }
+      setInterval(saveData, 30000);
+    </script>
+
+</body>
+
+</html>

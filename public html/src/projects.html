@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +9,6 @@
   <!-- Toastify CSS -->
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
-
 <body>
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
@@ -31,41 +29,86 @@
       </div>
     </div>
   </nav>
-  
   <div class="nav-link logged-in">
   <center>  
     <br>
     <h1>Projects</h1>
     <br>
   </center>
-  <div style="align-content: right; padding: 0% 15%;">     
-    <button type="button" class="btn btn-success rounded-pill px-4" onclick="window.location.href='new_project.html'">New Project</button>
-  </div>
-  <br>
-  <h2>Your projects:</h2>
+
+  <h2>Current projects:</h2>
   <ol id="project-list"></ol>
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>  
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>  
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
   <script>
-    function getProjects() {
-  projectRef.on('value', function(snapshot) {
-    const proyectos = snapshot.val();
-    const projectList = document.getElementById('project-list');
-    projectList.innerHTML = '';
-    for (let proyecto in proyectos) {
-      const projectItem = document.createElement('li');
-      const jsonObj = JSON.parse(proyectos[proyecto]);
-      const id = jsonObj.data[0].id;
-      const startDate = jsonObj.data[0].start_date;
-      const project_name = jsonObj.data[0].text;
-      const firstTask = project_name;
-      projectItem.innerHTML = id + firstTask + startDate;
-      projectList.appendChild(projectItem);
+    function get_id_project(id) {
+      document.cookie = 'pid=' + id; // guarda el id del proyecto en una cookie
     }
-  });
-}
+    function getProjects() {
+      projectRef.on('value', function(snapshot) {
+      const proyectos = snapshot.val();
+      const projectList = document.getElementById('project-list');
+      projectList.innerHTML = '';
+
+      const newProjectButton = document.createElement('button');
+      newProjectButton.classList.add('new-project-button');
+      newProjectButton.innerHTML = 'Create New Project';
+      
+      newProjectButton.addEventListener('click', function() {
+        window.location.href = 'new_project.html';
+      });
+      // insert the new project button at the beginning of the list
+      projectList.insertBefore(newProjectButton, projectList.firstChild);
+      for (let proyecto in proyectos) {
+        const jsonObj = JSON.parse(proyectos[proyecto]);
+        const id = jsonObj.data[0].id;
+        const startDate = jsonObj.data[0].start_date;
+        const endDate = jsonObj.data[0].end_date;
+        const project_name = jsonObj.data[0].text;
+        const firstTask = project_name;
+
+        const projectItem = document.createElement('div');
+        projectItem.classList.add('project-item');
+
+        const idElement = document.createElement('p');
+        idElement.classList.add('project-id');
+        idElement.innerHTML = '<b>Id:</b> ' + id;
+
+        const imgElement = document.createElement('img');
+        imgElement.src = 'src/img/project_icon.png';
+        imgElement.style.width = '80%';
+        imgElement.style.height = '80%';
+        imgElement.style.display = 'flex';
+        imgElement.style.margin = '0 auto';
+
+        const nameElement = document.createElement('p');
+        nameElement.classList.add('project-name');
+        nameElement.innerHTML = '<b>Name:</b> ' + firstTask;
+
+        const dateElement = document.createElement('p');
+        dateElement.classList.add('project-date');
+        // dateElement.innerHTML = '<b>Duration:</b> ' + startDate +' - ' + endDate;
+        dateElement.innerHTML = startDate +' - ' + endDate;
+        
+
+        projectItem.appendChild(idElement);
+        projectItem.appendChild(imgElement);
+        projectItem.appendChild(nameElement);
+        projectItem.appendChild(dateElement);
+        projectList.appendChild(projectItem);
+        projectItem.addEventListener('click', function() {
+          get_id_project(id); // llama a la función "get_id_project" pasando el id del proyecto como parámetro
+          window.location.href = 'edit_project.html'; // redirige a la página "edit_project.html"
+        });
+      }
+      });
+    }
+    // Obtener id del proyecto que se desea editar
+    // function get_id_project(){
+    //   document.cookie = "pid=" + *;
+    // }
     function get_uid() {
       var name = "uid=";
       var decoded_cookie = decodeURIComponent(document.cookie);
@@ -97,11 +140,51 @@
     getProjects();
   </script>
 </div>
-
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Toastify js -->
+  <style>
+    #project-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 10px;
+    }
+    .new-project-button, .project-item {
+      min-width: 250px;
+      max-width: 500px;
+      min-height: 250px;
+      max-height: 250px;
+    }
+    .new-project-button {
+      border-radius: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+      text-align: center;
+      border: 0px;
+    }
+    .project-item {
+      width: calc(20% - 20px);
+      max-width: 250px;
+      background-color: rgba(144,197,65,255);
+      border-radius: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .project-item:hover {
+      background-color: #739C36;
+    }
+    .project-item p {
+      color: white;
+      margin: 0;
+      font-size: 12px;
+    }
 
+    .project-id {
+      font-weight: bold;
+      font-size: 16px;
+    }
+  </style>
 </body>
-
 </html>
