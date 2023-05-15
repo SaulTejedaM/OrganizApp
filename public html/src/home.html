@@ -22,9 +22,9 @@
         <div class="navbar-nav ms-auto">
           <a class="nav-link logged-out" href="#" data-bs-toggle="modal" data-bs-target="#signinModal">Login</a>
           <a class="nav-link logged-out" href="#" data-bs-toggle="modal" data-bs-target="#signupModal">Signup</a>
-          <a class="nav-link logged-in" href="#">Profile</a>
+          <!-- <a class="nav-link logged-in" href="#">Profile</a> -->
           <a class="nav-link logged-in" href="projects.html">Projects</a>
-          <a class="nav-link logged-in" href="#">Teammates</a>
+          <!-- <a class="nav-link logged-in" href="#">Teammates</a> -->
           <a class="nav-link logged-in" href="">Settings</a>
           <a class="nav-link logged-in" href="#" id="logout">Logout</a>
         </div>
@@ -89,24 +89,24 @@
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>  
   <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
   <script>
-  const loginForm = document.getElementById('login-form');
-  const forgotPasswordForm = document.getElementById('forgot-password-form');
-  const forgotPasswordLink = document.getElementById('forgot-password-link');
-  const signinModal = document.getElementById('signinModal');
-// Agregar un controlador de eventos para el enlace 'Forgot your password?'
-  forgotPasswordLink.addEventListener('click', () => {
-    // Ocultar el formulario de inicio de sesión
-    loginForm.style.display = 'none';
-    // Mostrar el formulario 'Forgot password'
-    forgotPasswordForm.style.display = 'block';
-  });
-// Agregar un controlador de eventos para el botón de cerrar el modal
-signinModal.addEventListener('hidden.bs.modal', () => {
-  // Mostrar el formulario de inicio de sesión
-  loginForm.style.display = 'block';
-  // Ocultar el formulario 'Forgot password'
-  forgotPasswordForm.style.display = 'none';
-});
+    const loginForm = document.getElementById('login-form');
+    const forgotPasswordForm = document.getElementById('forgot-password-form');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const signinModal = document.getElementById('signinModal');
+    // Agregar un controlador de eventos para el enlace 'Forgot your password?'
+      forgotPasswordLink.addEventListener('click', () => {
+        // Ocultar el formulario de inicio de sesión
+        loginForm.style.display = 'none';
+        // Mostrar el formulario 'Forgot password'
+        forgotPasswordForm.style.display = 'block';
+      });
+    // Agregar un controlador de eventos para el botón de cerrar el modal
+    signinModal.addEventListener('hidden.bs.modal', () => {
+      // Mostrar el formulario de inicio de sesión
+      loginForm.style.display = 'block';
+      // Ocultar el formulario 'Forgot password'
+      forgotPasswordForm.style.display = 'none';
+    });
       const firebaseConfig = {
         apiKey: "AIzaSyD5e7ZJ4IJlxUOezr7SyGWxeIE2fe_jWuY",
         authDomain: "organizapp-6c914.firebaseapp.com",
