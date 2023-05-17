@@ -17,12 +17,34 @@ signUpForm.addEventListener("submit", async (e) => {
     const signupModal = document.querySelector('#signupModal');
     const modal = bootstrap.Modal.getInstance(signupModal);
     modal.hide();
+    auth.onAuthStateChanged(function(user) {
+    if (user) {
+      // User is signed in.
+      console.log("user signed in: ", user); 
+      document.cookie = "uid=" + user.uid;
+      document.querySelectorAll(".logged-in").forEach(function(link) {
+        link.style.display = "block";
+      });
+      document.querySelectorAll(".logged-out").forEach(function(link) {
+        link.style.display = "none";
+      });
+    } else {
+      // User is signed out.
+      console.log("user signed out");
+      document.querySelectorAll(".logged-in").forEach(function(link) {
+        link.style.display = "none";
+      });
+      document.querySelectorAll(".logged-out").forEach(function(link) {
+        link.style.display = "block";
+      });
+    }
+  });
 
     // reset the form
     signUpForm.reset();
 
     // show welcome message
-    showMessage("Welcome" + userCredentials.user.email);
+    showMessage("Welcome " + userCredentials.user.email);
 
   } catch (error) {
     if (error.code === 'auth/email-already-in-use') {

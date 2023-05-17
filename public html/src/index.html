@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <!-- BOOSTRAP CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css">
+  <!-- Toastify CSS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">OrganizApp</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link logged-out" href="#" data-bs-toggle="modal" data-bs-target="#signinModal">Login</a>
+          <a class="nav-link logged-out" href="#" data-bs-toggle="modal" data-bs-target="#signupModal">Signup</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <!-- Modal -->
+  <div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>SignUp</h3>
+          <button type="button" class="btn-close btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-5">
+          <form id="signup-form">
+            <label for="email">Email:</label>
+            <input type="text" id="signup-email" class="form-control mb-3" placeholder="Email" required>
+            <label for="password">Password:</label>
+            <input type="password" id="signup-password" class="form-control mb-3" placeholder="Password" required>    
+            <button type="submit" class="btn btn-success w-100 mb-4">Send</button>
+            <button type="button" class="btn btn-info w-30%" style="width: 33%;" id="googleLogin">Google</button>
+            <button type="button" class="btn btn-primary w-30%" style="width: 32%;" id="facebookLogin">Facebook</button>
+            <button type="button" class="btn btn-dark w-30" style="width: 32%;" id="githubLogin">Github</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="signinModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalSignin"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="btn-close btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="login-form">
+            <h3>LogIn</h3>
+            <label for="email">Email</label>
+            <input type="text" id="login-email" class="form-control mb-3" placeholder="Email" required>
+            <label for="password">Password:</label>
+            <input type="password" id="login-password" class="form-control mb-3" placeholder="Password" required>
+            <button type="submit" class="btn btn-success w-100 mb-4" onclick="get_username()">Login</button>
+            <center>
+            <a href="#" id="forgot-password-link">Forgot your password?</a>
+            </center>
+          </form>
+          <form id="forgot-password-form" style="display: none;">
+            <h3>Forgot your password?</h3>
+            <label for="email">Email</label>
+            <input type="text" id="forgot-password-email" class="form-control mb-3" placeholder="Email" required>
+            <button type="submit" class="btn btn-success w-100 mb-4">Send</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+  <script>
+    const loginForm = document.getElementById('login-form');
+    const forgotPasswordForm = document.getElementById('forgot-password-form');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const signinModal = document.getElementById('signinModal');
+    // Agregar un controlador de eventos para el enlace 'Forgot your password?'
+      forgotPasswordLink.addEventListener('click', () => {
+        // Ocultar el formulario de inicio de sesión
+        loginForm.style.display = 'none';
+        // Mostrar el formulario 'Forgot password'
+        forgotPasswordForm.style.display = 'block';
+      });
+    // Agregar un controlador de eventos para el botón de cerrar el modal
+    signinModal.addEventListener('hidden.bs.modal', () => {
+      // Mostrar el formulario de inicio de sesión
+      loginForm.style.display = 'block';
+      // Ocultar el formulario 'Forgot password'
+      forgotPasswordForm.style.display = 'none';
+    });
+      const firebaseConfig = {
+        apiKey: "AIzaSyD5e7ZJ4IJlxUOezr7SyGWxeIE2fe_jWuY",
+        authDomain: "organizapp-6c914.firebaseapp.com",
+        projectId: "organizapp-6c914",
+        storageBucket: "organizapp-6c914.appspot.com",
+        messagingSenderId: "447288139021",
+        appId: "1:447288139021:web:a72ec9d1a44319972da444"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      // Agregar un controlador de eventos para el botón 'Send' en el formulario de recuperación de contraseña
+      forgotPasswordForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const email = document.getElementById('forgot-password-email').value;
+        // Verificar que el correo exista en la base de datos de Firebase Auth
+        auth.sendPasswordResetEmail(email)
+          .then(() => {
+            Toastify({
+                    text: 'Se ha enviado un correo para restablecer la contraseña',
+                    backgroundColor: '#ffc371',
+                    className: 'error',
+                    position: 'right',
+                    duration: 1000
+                  }).showToast();
+            // alert('Se ha enviado un correo para restablecer la contraseña');
+            // Ocultar el formulario 'Forgot password'
+            forgotPasswordForm.style.display = 'none';
+            // Mostrar el formulario de inicio de sesión
+            loginForm.style.display = 'block';
+          })
+          .catch((error) => {
+            Toastify({
+              text: 'Error al enviar sus datos',
+              backgroundColor: '#ff5f6d',
+              className: 'error',
+              position: 'right',
+              duration: 3000
+            }).showToast();
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorCode, errorMessage);
+          });
+      });
+  function get_username(){
+    auth.onAuthStateChanged(function(user) {
+    if (user) {
+      // User is signed in.
+      console.log("user signed in: ", user); 
+      document.cookie = "uid=" + user.uid;
+      document.querySelectorAll(".logged-in").forEach(function(link) {
+        link.style.display = "block";
+      });
+      document.querySelectorAll(".logged-out").forEach(function(link) {
+        link.style.display = "none";
+      });
+    } else {
+      // User is signed out.
+      console.log("user signed out");
+      document.querySelectorAll(".logged-in").forEach(function(link) {
+        link.style.display = "none";
+      });
+      document.querySelectorAll(".logged-out").forEach(function(link) {
+        link.style.display = "block";
+      });
+    }
+  });
+  }
+  </script>
+  <div style="background-color: rgba(144,197,65,255);">
+    <div class="row">
+      <div class="col-md-6 offset-md-3">
+        <ul class="list-group posts">
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="nav-link logged-out">
+    <center>
+      <div id="carousel" style="background-color:rgb(196,204,188);">
+        <br>
+        <img src="src/img/1.jpg" alt="Image 3" style="width: 60%; height: 45%; border-radius: 15px; transition: opacity 0.5s ease;">
+        <img src="src/img/2.jpg" alt="Image 3" style="width: 60%; height: 45%; border-radius: 15px; transition: opacity 0.5s ease;">
+        <img src="src/img/3.jpg" alt="Image 3" style="width: 60%; height: 45%; border-radius: 15px; transition: opacity 0.5s ease;">
+        
+        <br>
+      </div>
+      <br>
+      <style>
+        #carousel {
+          overflow: hidden;
+
+        }
+      </style>
+           <script>
+            var currentImage = 0;
+            var images = document.querySelectorAll("#carousel img");
+            
+            function showImage(index) {
+              images.forEach(function(image) {
+                image.style.display = "none";
+              });
+              images[index].style.display = "block";
+            }
+            
+            function prevImage() {
+              currentImage--;
+              if (currentImage < 0) {
+                currentImage = images.length - 1;
+              }
+              showImage(currentImage);
+            }
+            
+            function nextImage() {
+              currentImage++;
+              if (currentImage >= images.length) {
+                currentImage = 0;
+              }
+              showImage(currentImage);
+            }
+            
+            // Mostrar la primera imagen al cargar la página
+            showImage(currentImage);
+            
+            // Configurar intervalo para cambiar automáticamente las imágenes
+            setInterval(nextImage, 3000); // Cambia la imagen cada 3 segundos (3000 milisegundos)
+          </script>
+      <h1>What's OrganizApp?</h1>
+      <p style="text-align: justify; margin: 0 auto; width: 40%;">Organizapp is a project management and personnel administration platform. Organizapp provides solutions for project planning, tracking, time management, and human resources management. Discover our features and start improving your team and project management today!</p>
+    </center> 
+  </div>
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Toastify js -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="./main.js" type="module"></script>
+</body>
+</html>
