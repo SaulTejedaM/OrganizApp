@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="../../codebase/dhtmlxgantt.css?v=8.0.1">
 </head>
 <body>
-  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
     <div class="container">
       <a class="navbar-brand" href="projects.html">OrganizApp</a>
@@ -96,7 +95,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>  
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
     <script>
-          const firebaseConfig = {
+      const firebaseConfig = {
         apiKey: "AIzaSyD5e7ZJ4IJlxUOezr7SyGWxeIE2fe_jWuY",
         authDomain: "organizapp-6c914.firebaseapp.com",
         projectId: "organizapp-6c914",
@@ -111,15 +110,12 @@
       const projectID = get_pid();
       const projectRef = database.ref('proyectos/'+userID+'/'+projectID);
       const teammateRef = database.ref('teammates/'+userID+'/'+projectID);
-
-
       gantt.plugins({
         export_api: true,
       });
       gantt.plugins({
         tooltip: true
       });
-
       gantt.plugins({
         multiselect: true,
         undo: true,
@@ -129,16 +125,14 @@
         undo: true
       });
       gantt.config.wide_form = 1;
-
+      gantt.config.resize_rows = true;
       gantt.templates.task_class = function (st, end, item) {
         return item.$level == 0 ? "gantt_project" : ""
       };
-
       function toggleGrid(){
         gantt.config.show_grid = !gantt.config.show_grid;
         gantt.render();
       }
-
       gantt.attachEvent("onGanttReady", function(){
         var tooltips = gantt.ext.tooltips;
         tooltips.tooltip.setViewport(gantt.$task_data);
@@ -149,12 +143,9 @@
         {unit: "month", step: 1, format: "%F, %Y"},
         {unit: "day", step: 1, format: "%j, %D"}
       ];
-
-
       gantt.plugins({
         critical_path: true
       });
-
       function updateCriticalPath(toggle) {
       toggle.enabled = !toggle.enabled;
       if (toggle.enabled) {
@@ -181,28 +172,9 @@
         gantt.config.highlight_critical_path = false;
       }
       gantt.render();
-    }
-
-    
-
-      // gantt.serverList("staff", [
-      //   {key: 1, label: "John", backgroundColor:"#03A9F4", textColor:"#FFF"},
-      //   {key: 2, label: "Mike", backgroundColor:"#f57730", textColor:"#FFF"},
-      //   {key: 3, label: "Anna", backgroundColor:"#e157de", textColor:"#FFF"},
-      //   {key: 4, label: "Bill", backgroundColor:"#78909C", textColor:"#FFF"},
-      //   {key: 7, label: "Floe", backgroundColor:"#8D6E63", textColor:"#FFF"}
-      // ]);
-    //   const newTeammate = {
-    //   "key": newKey,
-    //   "label": email,
-    //   "backgroundColor": "#03A9F4",
-    //   "textColor": "#FFF"
-    // }
-    // const jsonTeammate = JSON.stringify(newTeammate);
-      // const teammate = JSON.parse(teammates[key]);
-          
-      teammateRef.once('value', snapshot => {
-        const teammates = snapshot.val();
+    } 
+    teammateRef.once('value', snapshot => {
+      const teammates = snapshot.val();
         // Verificar si la base de datos está vacía
         if (!teammates) {
           // Si la base de datos está vacía, agregar una opción por defecto
@@ -224,28 +196,24 @@
               "textColor": "#FFF"
             };
           });
-          
           gantt.serverList("staff", staff);
           gantt.config.lightbox.sections = [
         {name: "description", height: 38, map_to: "text", type: "textarea", focus: true},
+        {name: "type", type: "typeselect", map_to: "type"},
         {name: "priority", height: 22, map_to: "priority", type: "select", options: gantt.serverList("priority")},
         {name: "owner", height: 22, map_to: "owner_id", type: "select", options: gantt.serverList("staff")},
         {name: "time", type: "duration", map_to: "auto"}
       ];
         }
       });
-
       gantt.serverList("priority", [
         {key: 1, label: "High"},
         {key: 2, label: "Normal"},
         {key: 3, label: "Low"}
       ]);
-    
-      // end test data
       gantt.config.grid_width = 500;
       gantt.config.grid_resize = true;
       gantt.config.open_tree_initially = true;
-    
       var labels = gantt.locale.labels;
 
       var textEditor = {type: "text", map_to: "text"};
@@ -273,9 +241,23 @@
             return byId(gantt.serverList('priority'), item.priority)}},
         {name: "add", width: 40}
       ];
-      
 
-    
+      gantt.config.lightbox.sections = [
+        {name: "description", height: 38, map_to: "text", type: "textarea", focus: true},
+        {name: "type", type: "typeselect", map_to: "type"},
+        {name: "priority", height: 22, map_to: "priority", type: "select", options: gantt.serverList("priority")},
+        {name: "time", type: "time", map_to: "auto", time_format: ["%d", "%m", "%Y"]},
+        {name: "owner", height: 22, map_to: "owner_id", type: "select", options: gantt.serverList("staff")},
+        
+      ];
+      gantt.attachEvent("onLightboxSave", function (id, item) {
+		  if (!item.text ||item.text==' ') {
+          gantt.message({type: "error", text: "Enter task description!"});
+          return false;
+        }
+        return true;
+      });
+
       gantt.templates.rightside_text = function(start, end, task){
         return byId(gantt.serverList('staff'), task.owner_id);
       };
@@ -317,6 +299,7 @@
         });
         element.innerHTML = html.join("");
       });
+
       gantt.templates.task_class = function (start, end, task) {
         switch (task.priority) {
           case "1":
@@ -361,9 +344,12 @@
       return "";
     }
 
-
+    const teammateRefe = database.ref('teammates/'+userID+'/'+projectID);
+    
       // Obtener el formulario de agregar un nuevo compañero de equipo
       const addTeammateForm = document.querySelector('#add-teammate-form');
+      
+      
 
       // Agregar un evento de escucha para enviar el formulario
       addTeammateForm.addEventListener('submit', (e) => {
@@ -372,9 +358,10 @@
         // Obtener el valor del campo de correo electrónico
         const email = addTeammateForm['add-teammate'].value;
         
+        
         // Verificar si el correo electrónico ya existe en la base de datos
     // Verificar si el correo electrónico ya existe en la base de datos
-    teammateRef.once('value', snapshot => {
+    teammateRefe.once('value', snapshot => {
       const teammates = snapshot.val() || {}; // Validación para base de datos vacía
       const teammateExists = Object.values(teammates).some(teammate => {
         const teammateObj = JSON.parse(teammate);
@@ -402,24 +389,22 @@
     }
     const jsonTeammate = JSON.stringify(newTeammate);
     // Guardar el objeto JSON en la base de datos
-    teammateRef.push(jsonTeammate);
+
+    teammateRefe.child(email.replace(/[.#$[\]]/g, '▓')).set(jsonTeammate);
 
     // Mostrar mensaje de éxito
-    Toastify({
-      text: 'E-mail registred',
-      backgroundColor: '#4caf50',
-      className: 'success',
-      position: 'right',
-      duration: 3000
-    }).showToast();
-
-    // Cerrar el modal
-    $('#teammateModal').modal('hide');
-
+          Toastify({
+            text: 'E-mail registred',
+            backgroundColor: '#4caf50',
+            className: 'success',
+            position: 'right',
+            duration: 3000
+          }).showToast();
+          // Cerrar el modal
+          ('#teammateModal').modal('hide');
           }
         });
       });
-
       projectRef.once('value', function(snapshot) {
         const taskData = snapshot.val();
         gantt.init("gantt_here");
@@ -437,8 +422,7 @@
           teammateList.appendChild(message);
           return;
         }
-        // Crear un botón para cada compañero de equipo y agregarlo a la lista
-        
+        // Crear un botón para cada compañero de equipo y agregarlo a la lista       
         Object.keys(teammates).forEach(key => {
           const teammate = JSON.parse(teammates[key]);
           const teammateinfo = teammate.label;
@@ -474,10 +458,23 @@
         var data = gantt.serialize();
         var id = data.data[0].id;
         var data = JSON.stringify(data);
-        console.log(id);
         const database = firebase.database();
         const userID = get_uid("userID");
-        const projectRef = database.ref('proyectos/'+userID+'/'+ id);
+        const projectRef = database.ref('proyectos/'+userID+'/'+ id); 
+        teammateRef.once('value').then(function(snapshot) {
+        snapshot.forEach(function(childSnapshot) {
+          var teammateID = childSnapshot.key;
+          var dataassigned = gantt.serialize();
+          var strdataassigned = JSON.stringify(dataassigned);
+          var parsedDataAssigned = JSON.parse(strdataassigned);
+          parsedDataAssigned.data.forEach(function(element) {
+            element.readonly = true;
+          });
+          var updatedDataAssigned = JSON.stringify(parsedDataAssigned);
+          const assignedprojectRef = database.ref('assignedproject/' + teammateID +'/'+id);
+          assignedprojectRef.set(updatedDataAssigned);
+        });
+      });
         projectRef.set(data, function(error) {
           if (error) {
             Toastify({

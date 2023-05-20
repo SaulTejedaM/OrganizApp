@@ -151,6 +151,7 @@
       // User is signed in.
       console.log("user signed in: ", user); 
       document.cookie = "uid=" + user.uid;
+      document.cookie = "uemail=" + user.email;
       document.querySelectorAll(".logged-in").forEach(function(link) {
         link.style.display = "block";
       });
@@ -183,7 +184,7 @@
       <div id="carousel" style="background-color:rgb(196,204,188);">
         <br>
         <img src="src/img/1.jpg" alt="Image 3" style="width: 60%; height: 45%; border-radius: 15px; transition: opacity 0.5s ease;">
-        <img src="src/img/2.jpg" alt="Image 3" style="width: 60%; height: 45%; border-radius: 15px; transition: opacity 0.5s ease;">
+        <a href="https://github.com/saulTejeda117/OrganizApp" target="_blank"><img src="src/img/2.jpg" alt="Image 3" style="width: 60%; height: 45%; border-radius: 15px; transition: opacity 0.5s ease;"></a>
         <img src="src/img/3.jpg" alt="Image 3" style="width: 60%; height: 45%; border-radius: 15px; transition: opacity 0.5s ease;">
         
         <br>

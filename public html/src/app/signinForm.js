@@ -13,16 +13,13 @@ signInForm.addEventListener("submit", async (e) => {
     const userCredentials = await signInWithEmailAndPassword(auth, email, password)
     console.log(userCredentials)
 
-    window.location.href = "projects.html";
-
     // Close the login modal
-    // const modal = bootstrap.Modal.getInstance(signInForm.closest('.modal'));
-    // modal.hide();
-
-    
+    const modal = bootstrap.Modal.getInstance(signInForm.closest('.modal'));
+    modal.hide();
 
     // reset the form
     signInForm.reset();
+    window.location.href = "projects.html";
 
     // show welcome message
     showMessage("Welcome " + userCredentials.user.email);

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Only read Project</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="../../codebase/dhtmlxgantt.js?v=8.0.1"></script>
+  <link rel="stylesheet" href="../../codebase/dhtmlxgantt.css?v=8.0.1">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="projects.html">OrganizApp</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link logged-in" href="projects.html">Projects</a>
+          <a class="nav-link logged-in" href="#">Settings</a>
+          <a class="nav-link logged-in" href="index.html" id="logout">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="nav-link logged-in">
+    <br>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-2">
+          <br>
+          <button type="button" style="width: 100%;" class="btn btn-primary" onclick="updateCriticalPath(this)">Show Critical Path</button>
+          <br><br>
+          <button type="button" style="width: 100%;" class="btn btn-primary" onclick="gantt.exportToPDF()">Download: pdf</button>
+          <br><br>
+          <button type="button" style="width: 100%;" class="btn btn-primary" onclick="gantt.exportToPNG()">Download: png</button>
+        </div>
+        <div class="col-md-10">
+          <br>
+          <div id="gantt_here" style="width: 80%; height:80%;position: absolute;"></div>     
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="teammateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalSignin" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="btn-close btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="teammates-form">
+              <h3>Teammates</h3>
+              <ol class="teammate-list"></ol>
+              <center>
+              <a href="#" id="teammate-button">Add new teammate</a>
+              </center>
+            </form>
+            <form id="add-teammate-form" style="display: none;">
+              <h3>Add teammate</h3>
+              <label for="email">Email</label>
+              <input type="text" id="add-teammate" class="form-control mb-3" placeholder="Email" required>
+              <button class="btn btn-success w-100 mb-4">Send</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+		html,
+		body {
+			height: 100%;
+			padding: 0px;
+			margin: 0px;
+			overflow: hidden;
+		}
+
+		.readonly, .readonly.odd{
+			background: Gainsboro;
+		}
+		.readonly_bar{
+			background: SlateGray;
+		}
+		.gantt_task_progress{
+			background-color:rgba(33,33,33,0.17);
+		}
+
+	</style>
+    <script>
+      const teammatesForm = document.getElementById('teammates-form');
+      const addteammateForm = document.getElementById('add-teammate-form');
+      const teammatebutton = document.getElementById('teammate-button');
+      const teammateModal = document.getElementById('teammateModal');
+      teammatebutton.addEventListener('click', () => {
+          teammatesForm.style.display = 'none';
+          addteammateForm.style.display = 'block';
+        });
+      teammateModal.addEventListener('hidden.bs.modal', () => {
+        teammatesForm.style.display = 'block';
+        addteammateForm.style.display = 'none';
+      });
+    </script>
+    <br>
+    <br>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>  
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>  
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script>
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5e7ZJ4IJlxUOezr7SyGWxeIE2fe_jWuY",
+        authDomain: "organizapp-6c914.firebaseapp.com",
+        projectId: "organizapp-6c914",
+        storageBucket: "organizapp-6c914.appspot.com",
+        messagingSenderId: "447288139021",
+        appId: "1:447288139021:web:a72ec9d1a44319972da444"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const database = firebase.database();
+      const userID = get_uid();
+      const projectID = get_pid();
+      const userEmail = get_uemail();
+      const projectRef = database.ref('proyectos/'+projectID);
+      
+
+
+      uEmail = userEmail.replace(/[.#$[\]]/g, '▓')
+      const teammateRef = database.ref('teammates/'+userID+'/'+projectID);
+
+
+
+
+
+
+      const assignedprojectRef = database.ref('assignedproject/'+uEmail+'/'+projectID);
+      gantt.plugins({
+        export_api: true,
+      });
+      gantt.plugins({
+        tooltip: true
+      });
+      gantt.plugins({
+        multiselect: true,
+        undo: true,
+      });
+      gantt.plugins({
+        keyboard_navigation: true,
+        undo: true
+      });
+      gantt.config.readonly= true;
+      gantt.config.wide_form = 1;
+      gantt.config.resize_rows = true;
+
+      gantt.templates.task_class = function (st, end, item) {
+        return item.$level == 0 ? "gantt_project" : ""
+      };
+      function toggleGrid(){
+        gantt.config.show_grid = !gantt.config.show_grid;
+        gantt.render();
+      }
+      gantt.attachEvent("onGanttReady", function(){
+        var tooltips = gantt.ext.tooltips;
+        tooltips.tooltip.setViewport(gantt.$task_data);
+      });
+      gantt.config.date_format = "%d-%m-%Y";
+      gantt.config.scale_height = 50;
+      gantt.config.scales = [
+        {unit: "month", step: 1, format: "%F, %Y"},
+        {unit: "day", step: 1, format: "%j, %D"}
+      ];
+      gantt.plugins({
+        critical_path: true
+      });
+      function updateCriticalPath(toggle) {
+      toggle.enabled = !toggle.enabled;
+      if (toggle.enabled) {
+        toggle.innerHTML = "Hide Critical Path";
+        gantt.config.highlight_critical_path = true;
+        gantt.eachTask(function (task) {
+          if (this.isCriticalTask(task) && !this.isTaskVisible(task)) {
+            var parent;
+            while (gantt.isTaskExists(task.parent)) {
+              parent = this.getTask(task.parent);
+              if (this.isTaskVisible(parent.id)) {
+                parent.$open = true;
+                break;
+              } else {
+                if (!parent.open)
+                  parent.$open = true;
+                parent = this.getTask(parent.parent);
+              }
+            }
+          }
+        });
+      } else {
+        toggle.innerHTML = "Expand critical tasks";
+        gantt.config.highlight_critical_path = false;
+      }
+      gantt.render();
+    } 
+    teammateRef.once('value', snapshot => {
+      const teammates = snapshot.val();
+        // Verificar si la base de datos está vacía
+        if (!teammates) {
+          // Si la base de datos está vacía, agregar una opción por defecto
+          const defaultTeammate = {
+            key: 0,
+            label: "No one",
+            backgroundColor: "#03A9F4",
+            textColor: "#FFF"
+          };
+          gantt.serverList("staff", [defaultTeammate]);
+        } else {
+          // Si la base de datos tiene datos, convertir los JSON en objetos JS y agregarlos a la lista de staff
+          const staff = Object.keys(teammates).map(key => {
+            const teammate = JSON.parse(teammates[key]);
+            return {
+              "key": teammate.key,
+              "label": teammate.label,
+              "backgroundColor": teammate.backgroundColor,
+              "textColor": "#FFF"
+            };
+          });
+          gantt.serverList("staff", staff);
+          gantt.config.lightbox.sections = [
+        {name: "description", height: 38, map_to: "text", type: "textarea", focus: true},
+        {name: "type", type: "typeselect", map_to: "type"},
+        {name: "priority", height: 22, map_to: "priority", type: "select", options: gantt.serverList("priority")},
+        {name: "owner", height: 22, map_to: "owner_id", type: "select", options: gantt.serverList("staff")},
+        {name: "time", type: "duration", map_to: "auto"}
+      ];
+        }
+      });
+
+      gantt.serverList("priority", [
+        {key: 1, label: "High"},
+        {key: 2, label: "Normal"},
+        {key: 3, label: "Low"}
+      ]);
+    
+      // end test data
+      gantt.config.grid_width = 500;
+      gantt.config.grid_resize = true;
+      gantt.config.open_tree_initially = true;
+    
+      var labels = gantt.locale.labels;
+
+      var textEditor = {type: "text", map_to: "text"};
+      var dateEditor = {type: "date", map_to: "start_date", min: new Date(2023, 0, 1), max: new Date(2024, 0, 1)};
+      var durationEditor = {type: "number", map_to: "duration", min:0, max: 100};
+      var priority = {type: "select", map_to: "priority", options:gantt.serverList("priority")};
+
+      labels.column_priority = labels.section_priority = "Priority";
+      labels.column_owner = labels.section_owner = "Owner";
+    
+      function byId(list, id) {
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].key == id)
+            return list[i].label || "";
+        }
+        return "";
+      }
+      
+    
+      gantt.config.columns = [
+        {name: "owner", width: 80, align: "center", template: function (item) {
+            return byId(gantt.serverList('staff'), item.owner_id)}},
+        {name: "text", label: "Task name", tree: true, width: '80'},
+        {name: "duration", width: 60, align: "center"},
+        {name: "priority", width: 80, align: "center", template: function (item) {
+            return byId(gantt.serverList('priority'), item.priority)}},
+        {name: "add", width: 40}
+      ];
+
+      gantt.config.lightbox.sections = [
+        {name: "description", height: 38, map_to: "text", type: "textarea", focus: true},
+        {name: "type", type: "typeselect", map_to: "type"},
+        {name: "priority", height: 22, map_to: "priority", type: "select", options: gantt.serverList("priority")},
+        {name: "time", type: "time", map_to: "auto", time_format: ["%d", "%m", "%Y"]},
+        {name: "owner", height: 22, map_to: "owner_id", type: "select", options: gantt.serverList("staff")},
+        
+      ];
+      gantt.templates.grid_row_class = 
+		gantt.templates.task_row_class = function(start, end, task){
+			if (gantt.isReadonly(task.readonly)) {
+				return "readonly"
+			};
+		};
+		gantt.templates.task_class = function(start, end, task){
+			if (gantt.isReadonly(task.readonly)) {
+				return "readonly_bar"
+			};
+		};
+
+
+		gantt.attachEvent("onTaskDblClick", function(id,e){
+			// gantt.showLightbox(id)
+			return false;
+		});
+
+		gantt.attachEvent("onLightboxSave", function(id, task, is_new){
+			if (gantt.isReadonly(id)){
+				gantt.alert("You cannot edit this task");
+				return false;
+			}
+
+			return true;
+		})
+
+      gantt.templates.rightside_text = function(start, end, task){
+        return byId(gantt.serverList('staff'), task.owner_id);
+      };
+    
+      gantt.templates.grid_row_class =
+        gantt.templates.task_row_class =
+          gantt.templates.task_class = function (start, end, task) {
+        var css = [];
+        if (task.$virtual || task.type == gantt.config.types.project)
+          css.push("summary-bar");
+    
+        if(task.owner_id){
+          css.push("gantt_resource_task gantt_resource_" + task.owner_id);
+        }
+    
+        return css.join(" ");
+      };
+    
+      gantt.attachEvent("onParse", function(){
+        var styleId = "dynamicGanttStyles";
+        var element = document.getElementById(styleId);
+        if(!element){
+          element = document.createElement("style");
+          element.id = styleId;
+          document.querySelector("head").appendChild(element);
+        }
+        var html = [];
+        var resources = gantt.serverList("staff");
+    
+        resources.forEach(function(r){
+          html.push(".gantt_task_line.gantt_resource_" + r.key + "{" +
+            "background-color:"+r.backgroundColor+"; " +
+            "color:"+r.textColor+";" +
+          "}");
+          html.push(".gantt_row.gantt_resource_" + r.key + " .gantt_cell:nth-child(1) .gantt_tree_content{" +
+            "background-color:"+r.backgroundColor+"; " +
+            "color:"+r.textColor+";" +
+            "}");
+        });
+        element.innerHTML = html.join("");
+      });
+
+      gantt.templates.task_class = function (start, end, task) {
+        switch (task.priority) {
+          case "1":
+            return "high";
+            break;
+          case "2":
+            return "medium";
+            break;
+          case "3":
+            return "low";
+            break;
+        }
+      };
+      function get_uemail() {
+      var name = "uemail=";
+      var decoded_cookie = decodeURIComponent(document.cookie);
+      var cookie_array = decoded_cookie.split(';');
+      for(var i = 0; i < cookie_array.length; i++) {
+        var cookie = cookie_array[i];
+        while (cookie.charAt(0) == ' ') {
+          cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(name) == 0) {
+          return cookie.substring(name.length, cookie.length);
+        }
+      }
+      return "";
+    }
+
+      function get_uid() {
+      var name = "uid=";
+      var decoded_cookie = decodeURIComponent(document.cookie);
+      var cookie_array = decoded_cookie.split(';');
+      for(var i = 0; i < cookie_array.length; i++) {
+        var cookie = cookie_array[i];
+        while (cookie.charAt(0) == ' ') {
+          cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(name) == 0) {
+          return cookie.substring(name.length, cookie.length);
+        }
+      }
+      return "";
+    }
+    function get_pid() {
+      var name = "pid=";
+      var decoded_cookie = decodeURIComponent(document.cookie);
+      var cookie_array = decoded_cookie.split(';');
+      for(var i = 0; i < cookie_array.length; i++) {
+        var cookie = cookie_array[i];
+        while (cookie.charAt(0) == ' ') {
+          cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(name) == 0) {
+          return cookie.substring(name.length, cookie.length);
+        }
+      }
+      return "";
+    }
+
+
+      // Obtener el formulario de agregar un nuevo compañero de equipo
+      const addTeammateForm = document.querySelector('#add-teammate-form');
+
+      // Agregar un evento de escucha para enviar el formulario
+      addTeammateForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        // Obtener el valor del campo de correo electrónico
+        const email = addTeammateForm['add-teammate'].value;
+        
+        // Verificar si el correo electrónico ya existe en la base de datos
+    // Verificar si el correo electrónico ya existe en la base de datos
+    teammateRef.once('value', snapshot => {
+      const teammates = snapshot.val() || {}; // Validación para base de datos vacía
+      const teammateExists = Object.values(teammates).some(teammate => {
+        const teammateObj = JSON.parse(teammate);
+        return teammateObj.label === email;
+      });
+  
+  if (teammateExists) {
+    // Mostrar mensaje de error
+    Toastify({
+      text: 'E-mail already registred',
+      backgroundColor: '#ff5f6d',
+      className: 'error',
+      position: 'right',
+      duration: 3000
+    }).showToast();
+  } else {
+    // Crear un objeto JSON con el correo electrónico y el número de teammate
+    const numTeammates = Object.keys(teammates).length;
+    const newKey = numTeammates + 1;
+    const newTeammate = {
+      "key": newKey,
+      "label": email,
+      "backgroundColor": "#03A9F4",
+      "textColor": "#FFF"
+    }
+    const jsonTeammate = JSON.stringify(newTeammate);
+    // Guardar el objeto JSON en la base de datos
+    
+    teammateRef.push(jsonTeammate);
+   
+
+
+
+
+
+    // Mostrar mensaje de éxito
+          Toastify({
+            text: 'E-mail registred',
+            backgroundColor: '#4caf50',
+            className: 'success',
+            position: 'right',
+            duration: 3000
+          }).showToast();
+          // Cerrar el modal
+          $('#teammateModal').modal('hide');
+          }
+        });
+      });
+      assignedprojectRef.once('value', function(snapshot) {
+        // https://organizapp-6c914-default-rtdb.firebaseio.com/proyectos/1684521148813
+        
+        const taskData = snapshot.val();
+        // alert(assignedprojectRef);
+        gantt.parse(taskData);
+        gantt.init("gantt_here");
+        
+      });
+      gantt.init("gantt_here");
+      // gantt.parse(taskData);
+      const teammateList = document.querySelector('.teammate-list');
+      teammateRef.on('value', snapshot => {
+        const teammates = snapshot.val();
+        // Si no hay compañeros de equipo, mostrar un mensaje
+        if (teammates=='' || teammates==null) {
+          const message = document.createElement('p');
+          message.textContent = 'No teammates found';
+          teammateList.appendChild(message);
+          return;
+        }
+        // Crear un botón para cada compañero de equipo y agregarlo a la lista       
+        Object.keys(teammates).forEach(key => {
+          const teammate = JSON.parse(teammates[key]);
+          const teammateinfo = teammate.label;
+          const button = document.createElement('button');
+          button.classList.add('btn', 'btn-primary', 'w-100', 'mb-4');
+          button.textContent = teammate.label; // Cambia 'name' por el nombre de la propiedad que almacena el nombre de cada compañero de equipo en tu archivo JSON
+          teammateList.appendChild(document.createElement('li').appendChild(button));
+        });
+      });
+    </script>
+  </div>
+</body>
+</html>
