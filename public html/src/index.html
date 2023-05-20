@@ -64,7 +64,8 @@
             <input type="text" id="login-email" class="form-control mb-3" placeholder="Email" required>
             <label for="password">Password:</label>
             <input type="password" id="login-password" class="form-control mb-3" placeholder="Password" required>
-            <button type="submit" class="btn btn-success w-100 mb-4" onclick="get_username()">Login</button>
+            <button type="submit" class="btn btn-success w-100 mb-4">Login</button>
+            <!-- <button type="submit" class="btn btn-success w-100 mb-4" onclick="get_username()">Login</button> -->
             <center>
             <a href="#" id="forgot-password-link">Forgot your password?</a>
             </center>
@@ -145,31 +146,31 @@
             console.log(errorCode, errorMessage);
           });
       });
-  function get_username(){
-    auth.onAuthStateChanged(function(user) {
-    if (user) {
-      // User is signed in.
-      console.log("user signed in: ", user); 
-      document.cookie = "uid=" + user.uid;
-      document.cookie = "uemail=" + user.email;
-      document.querySelectorAll(".logged-in").forEach(function(link) {
-        link.style.display = "block";
-      });
-      document.querySelectorAll(".logged-out").forEach(function(link) {
-        link.style.display = "none";
-      });
-    } else {
-      // User is signed out.
-      console.log("user signed out");
-      document.querySelectorAll(".logged-in").forEach(function(link) {
-        link.style.display = "none";
-      });
-      document.querySelectorAll(".logged-out").forEach(function(link) {
-        link.style.display = "block";
-      });
-    }
-  });
-  }
+      // function get_username(){
+      //   auth.onAuthStateChanged(function(user) {
+      //   if (user) {
+      //     // User is signed in.
+      //     console.log("user signed in: ", user); 
+      //     document.cookie = "uid=" + user.uid;
+      //     document.cookie = "uemail=" + user.email;
+      //     document.querySelectorAll(".logged-in").forEach(function(link) {
+      //       link.style.display = "block";
+      //     });
+      //     document.querySelectorAll(".logged-out").forEach(function(link) {
+      //       link.style.display = "none";
+      //     });
+      //   } else {
+      //     // User is signed out.
+      //     console.log("user signed out");
+      //     document.querySelectorAll(".logged-in").forEach(function(link) {
+      //       link.style.display = "none";
+      //     });
+      //     document.querySelectorAll(".logged-out").forEach(function(link) {
+      //       link.style.display = "block";
+      //     });
+      //   }
+      // });
+      // }
   </script>
   <div style="background-color: rgba(144,197,65,255);">
     <div class="row">
@@ -184,53 +185,98 @@
       <div id="carousel" style="background-color:rgb(196,204,188);">
         <br>
         <img src="src/img/1.jpg" alt="Image 3" style="width: 60%; height: 45%; border-radius: 15px; transition: opacity 0.5s ease;">
-        <a href="https://github.com/saulTejeda117/OrganizApp" target="_blank"><img src="src/img/2.jpg" alt="Image 3" style="width: 60%; height: 45%; border-radius: 15px; transition: opacity 0.5s ease;"></a>
+        <a href="https://github.com/saulTejeda117/OrganizApp" target="_blank">
+          <img src="src/img/2.jpg" alt="Image 3" style="width: 60%; height: 45%; border-radius: 15px; transition: opacity 0.5s ease;">
+        </a>
         <img src="src/img/3.jpg" alt="Image 3" style="width: 60%; height: 45%; border-radius: 15px; transition: opacity 0.5s ease;">
-        
-        <br>
-      </div>
-      <br>
-      <style>
+        <div class="dots">
+
+          <span class="arrow" onclick="prevImage()"><label style="user-select: none;">&#8249;</label></span>
+          <span class="dot" onclick="showImage(0)"></span>
+          <span class="dot" onclick="showImage(1)"></span>
+          <span class="dot" onclick="showImage(2)"></span>
+          <span class="arrow" onclick="nextImage()" ><label style="user-select: none;">&#8250;</label></span>
+        </div>
+        </div>
+        <style>
         #carousel {
           overflow: hidden;
+        }
+        footer {
+          background-color: #f5f5f5;
+          padding: 10px;
+          text-align: center;
+        }
+        .transparent-button {
+          background: transparent;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+        }
+        .arrow {
+          font-size: 40px;
+          color: #f5f5f5;
+          margin-bottom: 10px;
 
         }
-      </style>
-           <script>
-            var currentImage = 0;
-            var images = document.querySelectorAll("#carousel img");
-            
-            function showImage(index) {
-              images.forEach(function(image) {
-                image.style.display = "none";
-              });
-              images[index].style.display = "block";
-            }
-            
-            function prevImage() {
-              currentImage--;
-              if (currentImage < 0) {
-                currentImage = images.length - 1;
-              }
-              showImage(currentImage);
-            }
-            
-            function nextImage() {
-              currentImage++;
-              if (currentImage >= images.length) {
-                currentImage = 0;
-              }
-              showImage(currentImage);
-            }
-            
-            // Mostrar la primera imagen al cargar la página
-            showImage(currentImage);
-            
-            // Configurar intervalo para cambiar automáticamente las imágenes
-            setInterval(nextImage, 3000); // Cambia la imagen cada 3 segundos (3000 milisegundos)
-          </script>
+        
+        .dots {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        
+        .dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background-color: #f5f5f5;
+          margin: 0 5px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+        
+        .dot.active {
+          background-color: #454545;
+        }
+        </style>
+      <script>
+        var currentImage = 0;
+        var images = document.querySelectorAll("#carousel img");
+        var dots = document.querySelectorAll(".dot");
+        function showImage(index) {
+          images.forEach(function(image) {
+            image.style.display = "none";
+          });
+          dots.forEach(function(dot) {
+            dot.classList.remove("active");
+          });
+
+          images[index].style.display = "block";
+          dots[index].classList.add("active");
+        }
+        function prevImage() {
+          currentImage--;
+          if (currentImage < 0) {
+            currentImage = images.length - 1;
+          }
+          showImage(currentImage);
+        }
+        function nextImage() {
+          currentImage++;
+          if (currentImage >= images.length) {
+            currentImage = 0;
+          }
+          showImage(currentImage);
+        }
+        showImage(currentImage);
+        // Configurar intervalo para cambiar automáticamente las imágenes
+        setInterval(nextImage, 5000); // Cambia la imagen cada 3 segundos (3000 milisegundos)
+      </script>
+      <br>
       <h1>What's OrganizApp?</h1>
-      <p style="text-align: justify; margin: 0 auto; width: 40%;">Organizapp is a project management and personnel administration platform. Organizapp provides solutions for project planning, tracking, time management, and human resources management. Discover our features and start improving your team and project management today!</p>
+      <br>
+      <p style="text-align: justify; margin: 0 auto; width: 60%;">OrganizApp is a web application that provides a project management and tracking projects. With an intuitive user interface, this site offers task management, team collaboration, and progress tracking features. In addition, Organizapp also integrates DHX Gantt, a powerful tool for generating dynamic, interactive Gantt charts that allow users to visualize project timelines and dependencies.. Discover our features and start improving your team and project management today!</p>
     </center> 
   </div>
   <!-- SCRIPTS -->
@@ -239,4 +285,12 @@
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="./main.js" type="module"></script>
 </body>
+<footer style="text-align: center; margin-top: 50px;">
+  <p>&copy; OrganizApp. All rights reserved 2023.</p>
+  <p>
+    <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank">General Public License V.3.0</a> |
+    <a href="src/Privacy Policy OrganizApp.pdf" target="_blank">Privacy Notice</a> |
+    <a href="src/Terms and Conditions.pdf" target="_blank">Terms and Conditions</a>
+  </p>
+</footer>
 </html>

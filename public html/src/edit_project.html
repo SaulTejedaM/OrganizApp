@@ -405,13 +405,22 @@
           }
         });
       });
+
+
       projectRef.once('value', function(snapshot) {
         const taskData = snapshot.val();
         gantt.init("gantt_here");
         gantt.parse(taskData);
       });
-      gantt.init("gantt_here");
+
+
+
+      // Creación del diagrama 
+      // gantt.init("gantt_here");
       // gantt.parse(taskData);
+
+
+      // Genera la lista de imbéciles en el formulario de imbéciles
       const teammateList = document.querySelector('.teammate-list');
       teammateRef.on('value', snapshot => {
         const teammates = snapshot.val();
@@ -478,7 +487,7 @@
         projectRef.set(data, function(error) {
           if (error) {
             Toastify({
-              text: 'Error al guardar los datos',
+              text: 'Something went wrong',
               backgroundColor: '#ff5f6d',
               className: 'error',
               position: 'right',
@@ -486,8 +495,8 @@
             }).showToast();
           } else {
             Toastify({
-              text: 'Datos Guardados Exitosamente',
-              backgroundColor: '#ffc371',
+              text: 'Data were saved successfully',
+              backgroundColor: '#4caf50',
               className: 'error',
               position: 'right',
               duration: 3000

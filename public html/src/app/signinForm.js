@@ -16,13 +16,21 @@ signInForm.addEventListener("submit", async (e) => {
     // Close the login modal
     const modal = bootstrap.Modal.getInstance(signInForm.closest('.modal'));
     modal.hide();
+    auth.onAuthStateChanged(function(user) {
+        document.cookie = "uid=" + user.uid;
+        document.cookie = "uemail=" + user.email;
+    });
+
 
     // reset the form
     signInForm.reset();
+
     window.location.href = "projects.html";
+
 
     // show welcome message
     showMessage("Welcome " + userCredentials.user.email);
+    
   } catch (error) {
     if (error.code === 'auth/wrong-password') {
       showMessage("Wrong password", "error")

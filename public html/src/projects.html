@@ -19,6 +19,24 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav ms-auto">
+          <script>
+            function get_uemail() {
+              var name = "uemail=";
+              var decoded_cookie = decodeURIComponent(document.cookie);
+              var cookie_array = decoded_cookie.split(';');
+              for(var i = 0; i < cookie_array.length; i++) {
+                var cookie = cookie_array[i];
+                while (cookie.charAt(0) == ' ') {
+                  cookie = cookie.substring(1);
+                }
+                if (cookie.indexOf(name) == 0) {
+                  return cookie.substring(name.length, cookie.length);
+                }
+              }
+              return "";
+            }
+            alert(get_uemail());
+          </script>
           <!-- <a class="nav-link logged-in" href="#">Profile</a> -->
           <a class="nav-link logged-in" href="projects.html">Projects</a>
           <!-- <a class="nav-link logged-in" href="#">Teammates</a> -->
@@ -186,8 +204,7 @@
       }
       return "";
     }
-
-
+    // alert(get_uid());
     function get_uemail() {
       var name = "uemail=";
       var decoded_cookie = decodeURIComponent(document.cookie);

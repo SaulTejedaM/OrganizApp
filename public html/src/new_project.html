@@ -75,6 +75,7 @@
     </div>
   </div>
   <script>
+   
     const teammatesForm = document.getElementById('teammates-form');
     const addteammateForm = document.getElementById('add-teammate-form');
     const teammatebutton = document.getElementById('teammate-button');
@@ -93,7 +94,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Toastify js -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script src="./main.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>  
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
    
     <script>
       gantt.plugins({
@@ -168,41 +171,11 @@
         gantt.config.highlight_critical_path = false;
       }
       gantt.render();
-      
     }
-    teammateRef.once('value', snapshot => {
-      const teammates = snapshot.val();
-        // Verificar si la base de datos está vacía
-        if (!teammates) {
-          // Si la base de datos está vacía, agregar una opción por defecto
-          const defaultTeammate = {
-            key: 0,
-            label: "No one",
-            backgroundColor: "#03A9F4",
-            textColor: "#FFF"
-          };
-          gantt.serverList("staff", [defaultTeammate]);
-        } else {
-          // Si la base de datos tiene datos, convertir los JSON en objetos JS y agregarlos a la lista de staff
-          const staff = Object.keys(teammates).map(key => {
-            const teammate = JSON.parse(teammates[key]);
-            return {
-              "key": teammate.key,
-              "label": teammate.label,
-              "backgroundColor": teammate.backgroundColor,
-              "textColor": "#FFF"
-            };
-          });
-          gantt.serverList("staff", staff);
-          gantt.config.lightbox.sections = [
-        {name: "description", height: 38, map_to: "text", type: "textarea", focus: true},
-        {name: "type", type: "typeselect", map_to: "type"},
-        {name: "priority", height: 22, map_to: "priority", type: "select", options: gantt.serverList("priority")},
-        {name: "owner", height: 22, map_to: "owner_id", type: "select", options: gantt.serverList("staff")},
-        {name: "time", type: "duration", map_to: "auto"}
-      ];
-        }
-      });
+      gantt.serverList("staff", [
+        {key: 1, label: "No One", backgroundColor:"#03A9F4", textColor:"#FFF"},
+      ]);
+    
       gantt.serverList("priority", [
         {key: 1, label: "High"},
         {key: 2, label: "Normal"},
@@ -321,17 +294,8 @@
             break;
         }
       };
+      
       gantt.init("gantt_here");
-      gantt.parse(taskData);
-
-      gantt.showLightbox(1);
-
-    </script>
-  </div>
-  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>  
-  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
-  <script>
       const firebaseConfig = {
         apiKey: "AIzaSyD5e7ZJ4IJlxUOezr7SyGWxeIE2fe_jWuY",
         authDomain: "organizapp-6c914.firebaseapp.com",
@@ -341,6 +305,50 @@
         appId: "1:447288139021:web:a72ec9d1a44319972da444"
       };
       firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+      const userID = get_uid("userID");
+      // gantt.parse(taskData);
+      const teammateRef = database.ref('teammates/'+userID+'/'+id);
+      // gantt.showLightbox(1);
+      const teammateList = document.querySelector('.teammate-list');
+      teammateRef.on('value', snapshot => {
+        const teammates = snapshot.val();
+        // Si no hay compañeros de equipo, mostrar un mensaje
+        if (teammates=='' || teammates==null) {
+          const message = document.createElement('p');
+          message.textContent = 'No teammates found';
+          teammateList.appendChild(message);
+          return;
+        }
+        // Crear un botón para cada compañero de equipo y agregarlo a la lista       
+        Object.keys(teammates).forEach(key => {
+          const teammate = JSON.parse(teammates[key]);
+          const teammateinfo = teammate.label;
+          const button = document.createElement('button');
+          button.classList.add('btn', 'btn-primary', 'w-100', 'mb-4');
+          button.textContent = teammate.label; // Cambia 'name' por el nombre de la propiedad que almacena el nombre de cada compañero de equipo en tu archivo JSON
+          teammateList.appendChild(document.createElement('li').appendChild(button));
+        });
+      });
+      
+      // const auth = firebase.auth();
+      // const projectID = get_pid();
+      var data = gantt.serialize();
+      try {
+        // ***************
+        var id = data.data[0]?.id;
+        // ***************
+        
+      } catch (error) {
+        // Manejar el error capturado
+        console.error(error);
+      }
+            
+
+
+
+      const projectRef = database.ref('proyectos/'+userID+'/'+id);
+      
 
       function get_uid() {
         var name = "uid=";
@@ -357,118 +365,95 @@
         }
         return "";
       }
-      function get_pid() {
-        var projectid = "pid=";
-        var decoded_cookie = decodeURIComponent(document.cookie);
-        var cookie_array = decoded_cookie.split(';');
-        for(var i = 0; i < cookie_array.length; i++) {
-          var cookie = cookie_array[i];
-          while (cookie.charAt(0) == ' ') {
-            cookie = cookie.substring(1);
-          }
-          if (cookie.indexOf(projectid) == 0) {
-            return cookie.substring(projectid.length, cookie.length);
-          }
-        }
-        return "";
-      }
-      const teammateRefe = database.ref('teammates/'+userID+'/'+projectID);
-    
-    // Obtener el formulario de agregar un nuevo compañero de equipo
+      // function get_pid() {
+      //   var projectid = "pid=";
+      //   var decoded_cookie = decodeURIComponent(document.cookie);
+      //   var cookie_array = decoded_cookie.split(';');
+      //   for(var i = 0; i < cookie_array.length; i++) {
+      //     var cookie = cookie_array[i];
+      //     while (cookie.charAt(0) == ' ') {
+      //       cookie = cookie.substring(1);
+      //     }
+      //     if (cookie.indexOf(projectid) == 0) {
+      //       return cookie.substring(projectid.length, cookie.length);
+      //     }
+      //   }
+      //   return "";
+      // }
+
     const addTeammateForm = document.querySelector('#add-teammate-form');
-    
-    
-
-    // Agregar un evento de escucha para enviar el formulario
     addTeammateForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      // Obtener el valor del campo de correo electrónico
-      const email = addTeammateForm['add-teammate'].value;
-      
-      
-      // Verificar si el correo electrónico ya existe en la base de datos
-  // Verificar si el correo electrónico ya existe en la base de datos
-  teammateRefe.once('value', snapshot => {
-    const teammates = snapshot.val() || {}; // Validación para base de datos vacía
-    const teammateExists = Object.values(teammates).some(teammate => {
-      const teammateObj = JSON.parse(teammate);
-      return teammateObj.label === email;
-    });
-
-if (teammateExists) {
-  // Mostrar mensaje de error
-  Toastify({
-    text: 'E-mail already registred',
-    backgroundColor: '#ff5f6d',
-    className: 'error',
-    position: 'right',
-    duration: 3000
-  }).showToast();
-} else {
-  // Crear un objeto JSON con el correo electrónico y el número de teammate
-  const numTeammates = Object.keys(teammates).length;
-  const newKey = numTeammates + 1;
-  const newTeammate = {
-    "key": newKey,
-    "label": email,
-    "backgroundColor": "#03A9F4",
-    "textColor": "#FFF"
-  }
-  const jsonTeammate = JSON.stringify(newTeammate);
-  // Guardar el objeto JSON en la base de datos
-
-  teammateRefe.child(email.replace(/[.#$[\]]/g, '▓')).set(jsonTeammate);
-
-  // Mostrar mensaje de éxito
-        Toastify({
-          text: 'E-mail registred',
-          backgroundColor: '#4caf50',
-          className: 'success',
-          position: 'right',
-          duration: 3000
-        }).showToast();
-        // Cerrar el modal
-        ('#teammateModal').modal('hide');
+        e.preventDefault();
+        var data = gantt.serialize();
+        var id = data.data[0]?.id;
+        // Obtener el valor del campo de correo electrónico
+        const email = addTeammateForm['add-teammate'].value;
+        const teammateRefe = database.ref('teammates/'+userID+'/'+id);
+        // Verificar si el correo electrónico ya existe en la base de datos
+    // Verificar si el correo electrónico ya existe en la base de datos
+        alert(teammateRefe);
+        if(id==null ||id=={}||id==''){
+          Toastify({
+              text: 'Something went wrong',
+              backgroundColor: '#ffc371',
+              className: 'error',
+              position: 'right',
+              duration: 3000
+            }).showToast();
         }
+        else{
+        teammateRefe.once('value', snapshot => {
+          const teammates = snapshot.val() || {}; // Validación para base de datos vacía
+          const teammateExists = Object.values(teammates).some(teammate => {
+          const teammateObj = JSON.parse(teammate);
+          return teammateObj.label === email;
+        });
+  
+  if (teammateExists) {
+    // Mostrar mensaje de error
+    Toastify({
+      text: 'E-mail already registred',
+      backgroundColor: '#ff5f6d',
+      className: 'error',
+      position: 'right',
+      duration: 3000
+    }).showToast();
+  } else {
+    // Crear un objeto JSON con el correo electrónico y el número de teammate
+    const numTeammates = Object.keys(teammates).length;
+    const newKey = numTeammates + 1;
+    const newTeammate = {
+      "key": newKey,
+      "label": email,
+      "backgroundColor": "#03A9F4",
+      "textColor": "#FFF"
+    }
+    const jsonTeammate = JSON.stringify(newTeammate);
+    // Guardar el objeto JSON en la base de datos
+
+    teammateRefe.child(email.replace(/[.#$[\]]/g, '▓')).set(jsonTeammate);
+
+    // Mostrar mensaje de éxito
+          Toastify({
+            text: 'E-mail registred',
+            backgroundColor: '#4caf50',
+            className: 'success',
+            position: 'right',
+            duration: 3000
+          }).showToast();
+          // Cerrar el modal
+          ('#teammateModal').modal('hide');
+          }
+        });}
       });
-    });
-    projectRef.once('value', function(snapshot) {
-      const taskData = snapshot.val();
-      gantt.init("gantt_here");
-      gantt.parse(taskData);
-    });
-    gantt.init("gantt_here");
-    // gantt.parse(taskData);
-    const teammateList = document.querySelector('.teammate-list');
-    teammateRef.on('value', snapshot => {
-      const teammates = snapshot.val();
-      // Si no hay compañeros de equipo, mostrar un mensaje
-      if (teammates=='' || teammates==null) {
-        const message = document.createElement('p');
-        message.textContent = 'No teammates found';
-        teammateList.appendChild(message);
-        return;
-      }
-      // Crear un botón para cada compañero de equipo y agregarlo a la lista       
-      Object.keys(teammates).forEach(key => {
-        const teammate = JSON.parse(teammates[key]);
-        const teammateinfo = teammate.label;
-        const button = document.createElement('button');
-        button.classList.add('btn', 'btn-primary', 'w-100', 'mb-4');
-        button.textContent = teammate.label; // Cambia 'name' por el nombre de la propiedad que almacena el nombre de cada compañero de equipo en tu archivo JSON
-        teammateList.appendChild(document.createElement('li').appendChild(button));
-      });
-    });
       function saveData() {
         var data = gantt.serialize();
         var id = data.data[0].id;
         var data = JSON.stringify(data);
         const database = firebase.database();
-        const userID = get_uid("userID");
-        const projectID = get_pid();
+        
         const projectRef = database.ref('proyectos/'+userID+'/'+ id); 
-        const teammateRef = database.ref('teammates/'+userID+'/'+projectID);
+        const teammateRef = database.ref('teammates/'+userID+'/'+id)
         teammateRef.once('value').then(function(snapshot) {
         snapshot.forEach(function(childSnapshot) {
           var teammateID = childSnapshot.key;
@@ -486,7 +471,7 @@ if (teammateExists) {
         projectRef.set(data, function(error) {
           if (error) {
             Toastify({
-              text: 'Error al guardar los datos',
+              text: 'Something went wrong',
               backgroundColor: '#ff5f6d',
               className: 'error',
               position: 'right',
@@ -494,8 +479,8 @@ if (teammateExists) {
             }).showToast();
           } else {
             Toastify({
-              text: 'Datos Guardados Exitosamente',
-              backgroundColor: '#ffc371',
+              text: 'Data were saved successfully',
+              backgroundColor: '#4caf50',
               className: 'error',
               position: 'right',
               duration: 3000
@@ -504,7 +489,18 @@ if (teammateExists) {
         });
       }
       setInterval(saveData, 30000);
+
+
+
+
     </script>
+  </div>
+  <!-- <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+  <script>
+      
+    </script> -->
 
 </body>
 
