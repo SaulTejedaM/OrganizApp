@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="../../codebase/dhtmlxgantt.js?v=8.0.1"></script>
+  <link rel="stylesheet" href="../../codebase/dhtmlxgantt.css?v=8.0.1">
+
+  <style>
+    .input{
+      width: 10%;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="projects.html">OrganizApp</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link logged-in" href="projects.html">Projects</a>
+          <a class="nav-link logged-in" href="settings.html">Settings</a>
+          <a class="nav-link logged-in" href="index.html" id="logout">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+  <script>
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5e7ZJ4IJlxUOezr7SyGWxeIE2fe_jWuY",
+      authDomain: "organizapp-6c914.firebaseapp.com",
+      projectId: "organizapp-6c914",
+      storageBucket: "organizapp-6c914.appspot.com",
+      messagingSenderId: "447288139021",
+      appId: "1:447288139021:web:a72ec9d1a44319972da444"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+    
+
+
+    function get_uemail() {
+      var name = "uemail=";
+      var decoded_cookie = decodeURIComponent(document.cookie);
+      var cookie_array = decoded_cookie.split(';');
+      for(var i = 0; i < cookie_array.length; i++) {
+        var cookie = cookie_array[i];
+        while (cookie.charAt(0) == ' ') {
+          cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(name) == 0) {
+          return cookie.substring(name.length, cookie.length);
+        }
+      }
+      return "";
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      var emailInputs = document.querySelectorAll('.form-control');
+      var userEmail = get_uemail();
+      emailInputs.forEach(function(input) {
+        input.value = userEmail;
+      });
+    });
+    function get_uid() {
+      var name = "uid=";
+      var decoded_cookie = decodeURIComponent(document.cookie);
+      var cookie_array = decoded_cookie.split(';');
+      for(var i = 0; i < cookie_array.length; i++) {
+        var cookie = cookie_array[i];
+        while (cookie.charAt(0) == ' ') {
+          cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(name) == 0) {
+          return cookie.substring(name.length, cookie.length);
+        }
+      }
+      return "";
+    }
+    function get_uemail() {
+      var name = "uemail=";
+      var decoded_cookie = decodeURIComponent(document.cookie);
+      var cookie_array = decoded_cookie.split(';');
+      for(var i = 0; i < cookie_array.length; i++) {
+        var cookie = cookie_array[i];
+        while (cookie.charAt(0) == ' ') {
+          cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(name) == 0) {
+          return cookie.substring(name.length, cookie.length);
+        }
+      }
+      return "";
+    }
+    
+
+    function remove_allinfo() {
+        const userID = get_uid();
+
+        teammateemail = get_uemail();
+        teammateID = teammateemail.replace(/[.#$[\]]/g, '▓')
+
+        // Mostrar cuadro de diálogo de confirmación
+        const confirmed = confirm('Are you sure you want to remove this project?');
+        if (confirmed) {
+            var user = firebase.auth().currentUser;
+            
+        // 1. eliminar los assigned projects
+        // 2. eliminar los teammates
+        // 3. eliminar el proyecto ya alv
+        var teammatesRef = firebase.database().ref('teammates/' + userID);
+        firebase.database().ref('assignedproject/' + teammateID).remove().then(function() {
+              firebase.database().ref('proyectos/'+userID).remove()
+              firebase.database().ref('teammates/'+userID).remove()
+              user.delete().then(function() {
+                // User account deleted successfully
+                Toastify({
+                text: 'Data removed successfully',
+                backgroundColor: '#4caf50',
+                className: 'success',
+                position: 'right',
+                duration: 3000
+              }).showToast();
+              window.location.href = 'index.html';
+                // You can redirect the user to a different page or show a success message
+                }).catch(function(error) {
+                // An error occurred while deleting the user account
+                console.log(error);
+                // You can show an error message to the user
+                });
+
+              
+              // Los datos se eliminaron correctamente
+              
+
+            });
+      }
+    }
+
+    function send_email_forgotpassword () {
+        event.preventDefault();
+        email = get_uemail()
+        // Verificar que el correo exista en la base de datos de Firebase Auth
+        auth.sendPasswordResetEmail(email)
+            .then(() => {
+            Toastify({
+                    text: 'Se ha enviado un correo para restablecer la contraseña',
+                    backgroundColor: '#ffc371',
+                    className: 'error',
+                    position: 'right',
+                    duration: 1000
+                    }).showToast();window.location.href = 'index.html';
+            })
+            .catch((error) => {
+            Toastify({
+                text: 'Error al enviar sus datos',
+                backgroundColor: '#ff5f6d',
+                className: 'error',
+                position: 'right',
+                duration: 3000
+            }).showToast();
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorCode, errorMessage);
+            });
+
+    }
+  </script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8">
+        <div class="my-5 text-center">
+          <h1>Settings</h1>
+        </div>
+        <div class="action-container">
+          <h2>Reset my password:</h2>
+          <p class="text-justify">Clicking this button will send an email with a link that will allow you to reset your current password.</p>
+        </div>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control input-20" value="Your Email" disabled>
+          <button class="btn btn-primary" onclick="send_email_forgotpassword()">Reset Password</button>
+        </div>
+        <br>
+        <div class="action-container">
+          <h2>Delete my account:</h2>
+        </div>
+        <p class="text-justify">Clicking this button will permanently delete your account and all associated data. This action cannot be undone.</p>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control input-20" value="Your Email" disabled>
+          <button class="btn btn-danger" onclick="remove_allinfo()">Delete Account</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</body>
+</html>

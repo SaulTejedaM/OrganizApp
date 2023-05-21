@@ -24,7 +24,7 @@ signInForm.addEventListener("submit", async (e) => {
 
     // reset the form
     signInForm.reset();
-
+    
     window.location.href = "projects.html";
 
 

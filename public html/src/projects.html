@@ -35,12 +35,12 @@
               }
               return "";
             }
-            alert(get_uemail());
+            // alert(get_uemail());
           </script>
           <!-- <a class="nav-link logged-in" href="#">Profile</a> -->
           <a class="nav-link logged-in" href="projects.html">Projects</a>
           <!-- <a class="nav-link logged-in" href="#">Teammates</a> -->
-          <a class="nav-link logged-in" href="#">Settings</a>
+          <a class="nav-link logged-in" href="settings.html">Settings</a>
           <a class="nav-link logged-in" href="index.html" id="logout">Logout</a>
         </div>
       </div>
@@ -66,81 +66,75 @@
       document.cookie = 'pid=' + id; // guarda el id del proyecto en una cookie
     }
     function getProjects() {
-      projectRef.on('value', function(snapshot) {
-      const proyectos = snapshot.val();
-      const projectList = document.getElementById('project-list');
-      projectList.innerHTML = '';
+  projectRef.on('value', function(snapshot) {
+    const proyectos = snapshot.val();
+    const projectList = document.getElementById('project-list');
+    projectList.innerHTML = '';
 
-      const newProjectButton = document.createElement('button');
-      newProjectButton.classList.add('new-project-button');
-      newProjectButton.innerHTML = 'Create New Project';
-      
-      newProjectButton.addEventListener('click', function() {
-        window.location.href = 'new_project.html';
+    const newProjectButton = document.createElement('button');
+    newProjectButton.classList.add('new-project-button');
+    newProjectButton.innerHTML = 'Create New Project';
+    
+    newProjectButton.addEventListener('click', function() {
+      window.location.href = 'new_project.html';
+    });
+    // insert the new project button at the beginning of the list
+    projectList.insertBefore(newProjectButton, projectList.firstChild);
+    for (let proyecto in proyectos) {
+      const jsonObj = JSON.parse(proyectos[proyecto]);
+      const id = jsonObj.data[0].id;
+      const startDate = jsonObj.data[0].start_date;
+      const endDate = jsonObj.data[0].end_date;
+      const project_name = jsonObj.data[0].text;
+      const firstTask = project_name;
+
+      const projectItem = document.createElement('div');
+      projectItem.classList.add('project-item');
+
+      const idElement = document.createElement('p');
+      idElement.classList.add('project-id');
+      idElement.innerHTML = '<b>Id:</b> ' + id;
+
+      const imgElement = document.createElement('img');
+      imgElement.src = 'src/img/project_icon.png';
+      imgElement.style.width = '65%';
+      imgElement.style.height = '65%';
+      imgElement.style.display = 'flex';
+      imgElement.style.margin = '0 auto';
+
+      const nameElement = document.createElement('p');
+      nameElement.classList.add('project-name');
+      nameElement.innerHTML = '<b>Name:</b> ' + firstTask;
+
+      const dateElement = document.createElement('p');
+      dateElement.classList.add('project-date');
+      dateElement.innerHTML = startDate + ' - ' + endDate;
+
+      const removeButton = document.createElement('button');
+      removeButton.classList.add('remove-button');
+      removeButton.innerHTML = 'Remove Project';
+      removeButton.addEventListener('click', function() {
+        remove_project(id); // llama a la función "remove_project" pasando el id del proyecto como parámetro
       });
-      // insert the new project button at the beginning of the list
-      projectList.insertBefore(newProjectButton, projectList.firstChild);
-      for (let proyecto in proyectos) {
-        const jsonObj = JSON.parse(proyectos[proyecto]);
-        const id = jsonObj.data[0].id;
-        const startDate = jsonObj.data[0].start_date;
-        const endDate = jsonObj.data[0].end_date;
-        const project_name = jsonObj.data[0].text;
-        const firstTask = project_name;
 
-        const projectItem = document.createElement('div');
-        projectItem.classList.add('project-item');
-
-        const idElement = document.createElement('p');
-        idElement.classList.add('project-id');
-        idElement.innerHTML = '<b>Id:</b> ' + id;
-
-        const imgElement = document.createElement('img');
-        imgElement.src = 'src/img/project_icon.png';
-        imgElement.style.width = '80%';
-        imgElement.style.height = '80%';
-        imgElement.style.display = 'flex';
-        imgElement.style.margin = '0 auto';
-
-        const nameElement = document.createElement('p');
-        nameElement.classList.add('project-name');
-        nameElement.innerHTML = '<b>Name:</b> ' + firstTask;
-
-        const dateElement = document.createElement('p');
-        dateElement.classList.add('project-date');
-        // dateElement.innerHTML = '<b>Duration:</b> ' + startDate +' - ' + endDate;
-        dateElement.innerHTML = startDate +' - ' + endDate;
-        
-
-        projectItem.appendChild(idElement);
-        projectItem.appendChild(imgElement);
-        projectItem.appendChild(nameElement);
-        projectItem.appendChild(dateElement);
-        projectList.appendChild(projectItem);
-        projectItem.addEventListener('click', function() {
-          get_id_project(id); // llama a la función "get_id_project" pasando el id del proyecto como parámetro
-          window.location.href = 'edit_project.html'; // redirige a la página "edit_project.html"
-        });
-      }
+      projectItem.appendChild(idElement);
+      projectItem.appendChild(imgElement);
+      projectItem.appendChild(nameElement);
+      projectItem.appendChild(dateElement);
+      projectItem.appendChild(removeButton);
+      projectList.appendChild(projectItem);
+      imgElement.addEventListener('click', function() {
+        get_id_project(id);
+        window.location.href = 'edit_project.html';
       });
     }
-
-
+  });
+}
     function getassignedProjects() {
       assignedprojectRef.on('value', function(snapshot) {
       const proyectos = snapshot.val();
       const projectList = document.getElementById('assignedproject-list');
       projectList.innerHTML = '';
-
-      // const newProjectButton = document.createElement('button');
-      // newProjectButton.classList.add('new-project-button');
-      // newProjectButton.innerHTML = 'Create New Project';
-      
-      // newProjectButton.addEventListener('click', function() {
-      //   window.location.href = 'onlyreadproject.html';
-      // });
-      // // insert the new project button at the beginning of the list
-      // projectList.insertBefore(newProjectButton, projectList.firstChild);
       for (let proyecto in proyectos) {
         const jsonObj = JSON.parse(proyectos[proyecto]);
         const id = jsonObj.data[0].id;
@@ -158,8 +152,8 @@
 
         const imgElement = document.createElement('img');
         imgElement.src = 'src/img/project_icon.png';
-        imgElement.style.width = '80%';
-        imgElement.style.height = '80%';
+        imgElement.style.width = '65%';
+        imgElement.style.height = '65%';
         imgElement.style.display = 'flex';
         imgElement.style.margin = '0 auto';
 
@@ -185,10 +179,6 @@
       }
       });
     }
-    // Obtener id del proyecto que se desea editar
-    // function get_id_project(){
-    //   document.cookie = "pid=" + *;
-    // }
     function get_uid() {
       var name = "uid=";
       var decoded_cookie = decodeURIComponent(document.cookie);
@@ -234,11 +224,39 @@
     const userID = get_uid();
     const userEmail = get_uemail();
     const projectRef = database.ref('proyectos/'+userID);
-
     uEmail = userEmail.replace(/[.#$[\]]/g, '▓')
-    // alert(uEmail);
+    function remove_project(id) {
+  // Mostrar cuadro de diálogo de confirmación
+      const confirmed = confirm('Are you sure you want to remove this project?');
 
-    
+      if (confirmed) {
+        // 1. eliminar los assigned projects
+        // 2. eliminar los teammates
+        // 3. eliminar el proyecto ya alv
+        var teammatesRef = firebase.database().ref('teammates/' + userID + '/' + id);
+
+        teammatesRef.once('value').then(function(snapshot) {
+          snapshot.forEach(function(childSnapshot) {
+            // Obtener el ID de cada registro
+            var teammateID = childSnapshot.key;
+
+            // Eliminar los datos en 'assignedproject' correspondientes al ID del compañero de equipo
+            firebase.database().ref('assignedproject/' + teammateID + '/' + id).remove().then(function() {
+              firebase.database().ref('proyectos/'+userID+'/'+id).remove()
+              firebase.database().ref('teammates/'+userID+'/'+id).remove()
+              // Los datos se eliminaron correctamente
+              Toastify({
+                text: 'Data removed successfully',
+                backgroundColor: '#4caf50',
+                className: 'success',
+                position: 'right',
+                duration: 3000
+              }).showToast();
+            });
+          });
+        });
+      }
+    }
     const assignedprojectRef = database.ref('assignedproject/'+uEmail);
     getProjects();
     getassignedProjects();
@@ -247,6 +265,7 @@
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Toastify js -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <style>
     #project-list, #assignedproject-list {
       display: flex;
@@ -305,7 +324,6 @@
       margin: 0;
       font-size: 12px;
     }
-
     .project-id {
       font-weight: bold;
       font-size: 16px;

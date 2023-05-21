@@ -20,7 +20,7 @@
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav ms-auto">
           <a class="nav-link logged-in" href="projects.html">Projects</a>
-          <a class="nav-link logged-in" href="#">Settings</a>
+          <a class="nav-link logged-in" href="settings.html">Settings</a>
           <a class="nav-link logged-in" href="index.html" id="logout">Logout</a>
         </div>
       </div>
@@ -57,7 +57,7 @@
           <div class="modal-body">
             <form id="teammates-form">
               <h3>Teammates</h3>
-              <ol class="teammate-list"></ol>
+              <ul class="teammate-list"></ul>
               <center>
               <a href="#" id="teammate-button">Add new teammate</a>
               </center>
@@ -393,15 +393,18 @@
     teammateRefe.child(email.replace(/[.#$[\]]/g, '▓')).set(jsonTeammate);
 
     // Mostrar mensaje de éxito
-          Toastify({
-            text: 'E-mail registred',
-            backgroundColor: '#4caf50',
-            className: 'success',
-            position: 'right',
-            duration: 3000
-          }).showToast();
+          // Toastify({
+          //   text: 'E-mail registred',
+          //   backgroundColor: '#4caf50',
+          //   className: 'success',
+          //   position: 'right',
+          //   duration: 3000
+          // }).showToast();
           // Cerrar el modal
+          saveData();
           ('#teammateModal').modal('hide');
+          
+
           }
         });
       });
@@ -412,6 +415,26 @@
         gantt.init("gantt_here");
         gantt.parse(taskData);
       });
+
+      function remove_teammate(idteammate) {
+        emailteammate = idteammate.replace(/[.#$[\]]/g, '▓');
+        const confirmed = confirm('Are you sure you want to remove this teammate?');
+        if (confirmed) { 
+          firebase.database().ref('assignedproject/' + emailteammate + '/' + projectID).remove()
+          // alert('teammates/' + userID + '/' + projectID + '/' + emailteammate);
+
+          firebase.database().ref('teammates/' + userID + '/' + projectID + '/' + emailteammate).remove().then(function() {
+            // Los datos se eliminaron correctamente
+            Toastify({
+              text: 'Data removed successfully',
+              backgroundColor: '#4caf50',
+              className: 'success',
+              position: 'right',
+              duration: 3000
+            }).showToast();
+          });
+        }
+      }
 
 
 
@@ -438,7 +461,12 @@
           const button = document.createElement('button');
           button.classList.add('btn', 'btn-primary', 'w-100', 'mb-4');
           button.textContent = teammate.label; // Cambia 'name' por el nombre de la propiedad que almacena el nombre de cada compañero de equipo en tu archivo JSON
-          teammateList.appendChild(document.createElement('li').appendChild(button));
+          button.addEventListener('click', () => {
+            remove_teammate(teammateinfo); // Llama a la función remove_teammate con el ID del compañero de equipo como argumento
+          });
+          const listItem = document.createElement('ul');
+          listItem.appendChild(button);
+          teammateList.appendChild(listItem);
         });
       });
     </script>

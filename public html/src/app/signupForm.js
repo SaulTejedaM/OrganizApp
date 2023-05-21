@@ -42,6 +42,11 @@ signUpForm.addEventListener("submit", async (e) => {
 
     // reset the form
     signUpForm.reset();
+    auth.onAuthStateChanged(function(user) {
+      document.cookie = "uid=" + user.uid;
+      document.cookie = "uemail=" + user.email;
+  });
+  window.location.href = "projects.html";
 
     // show welcome message
     showMessage("Welcome " + userCredentials.user.email);

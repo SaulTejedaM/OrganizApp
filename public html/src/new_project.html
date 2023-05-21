@@ -22,7 +22,7 @@
           <!-- <a class="nav-link logged-in" href="#">Profile</a> -->
           <a class="nav-link logged-in" href="projects.html">Projects</a>
           <!-- <a class="nav-link logged-in" href="#">Teammates</a> -->
-          <a class="nav-link logged-in" href="#">Settings</a>
+          <a class="nav-link logged-in" href="settings.html">Settings</a>
           <a class="nav-link logged-in" href="index.html#" id="logout">Logout</a>
         </div>
       </div>
@@ -294,6 +294,26 @@
             break;
         }
       };
+
+      function remove_teammate(idteammate) {
+        emailteammate = idteammate.replace(/[.#$[\]]/g, '▓');
+        const confirmed = confirm('Are you sure you want to remove this teammate?');
+        if (confirmed) { 
+          firebase.database().ref('assignedproject/' + emailteammate + '/' + projectID).remove()
+          firebase.database().ref('teammates/' + userID + '/' + projectID + '/' + emailteammate).remove().then(function() {
+            // Los datos se eliminaron correctamente
+            Toastify({
+              text: 'Data removed successfully',
+              backgroundColor: '#4caf50',
+              className: 'success',
+              position: 'right',
+              duration: 3000
+            }).showToast();
+          });
+        }
+      }
+
+
       
       gantt.init("gantt_here");
       const firebaseConfig = {
@@ -327,7 +347,12 @@
           const button = document.createElement('button');
           button.classList.add('btn', 'btn-primary', 'w-100', 'mb-4');
           button.textContent = teammate.label; // Cambia 'name' por el nombre de la propiedad que almacena el nombre de cada compañero de equipo en tu archivo JSON
-          teammateList.appendChild(document.createElement('li').appendChild(button));
+          button.addEventListener('click', () => {
+            remove_teammate(teammateinfo); // Llama a la función remove_teammate con el ID del compañero de equipo como argumento
+          });
+          const listItem = document.createElement('ul');
+          listItem.appendChild(button);
+          teammateList.appendChild(listItem);
         });
       });
       
@@ -391,7 +416,7 @@
         const teammateRefe = database.ref('teammates/'+userID+'/'+id);
         // Verificar si el correo electrónico ya existe en la base de datos
     // Verificar si el correo electrónico ya existe en la base de datos
-        alert(teammateRefe);
+        // alert(teammateRefe);
         if(id==null ||id=={}||id==''){
           Toastify({
               text: 'Something went wrong',
@@ -432,20 +457,18 @@
     // Guardar el objeto JSON en la base de datos
 
     teammateRefe.child(email.replace(/[.#$[\]]/g, '▓')).set(jsonTeammate);
-
-    // Mostrar mensaje de éxito
-          Toastify({
-            text: 'E-mail registred',
-            backgroundColor: '#4caf50',
-            className: 'success',
-            position: 'right',
-            duration: 3000
-          }).showToast();
-          // Cerrar el modal
+          saveData();
           ('#teammateModal').modal('hide');
           }
         });}
       });
+
+
+
+
+
+
+////// <=============GUARDAR===============>
       function saveData() {
         var data = gantt.serialize();
         var id = data.data[0].id;

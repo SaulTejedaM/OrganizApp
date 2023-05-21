@@ -7,6 +7,7 @@ logout.addEventListener("click", async (e) => {
   e.preventDefault();
   try {
     await signOut(auth)
+    signInForm.reset();
     console.log("signup out");
   } catch (error) {
     console.log(error)

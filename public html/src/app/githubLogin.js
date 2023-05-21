@@ -12,6 +12,11 @@ githubButton.addEventListener("click", async (e) => {
     const credentials = await signInWithPopup(auth, provider)
     console.log(credentials);
     console.log("google sign in");
+    auth.onAuthStateChanged(function(user) {
+      document.cookie = "uid=" + user.uid;
+      document.cookie = "uemail=" + user.email;
+  });
+    window.location.href = "projects.html";
     
     // Close the login modal
     const modalInstance = bootstrap.Modal.getInstance(githubButton.closest('.modal'));
