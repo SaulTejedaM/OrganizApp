@@ -17,9 +17,6 @@ This web application provides a project management web site for organizing and t
 
 | Component | Required |
 | --- | --- |
-| CPU | 2 GHz or faster |
-| RAM | 4 GB or more |
-| Storage | 1 GB or more |
 | Resolution | 1920x1080p or higher |
 | Internet Connection | Required |
 | Recommended Browser | Google Chrome |
@@ -33,13 +30,12 @@ This web application provides a project management web site for organizing and t
 ## ⚙️ Instalation/Configuration Process
 
 - Download files from repository
-  - Download directly 'public html' folder 
+  - Download directly 'build' folder 
   
   - Or you can also clone the repository by the following command:
 ````
-gh repo clone saulTejeda117/OrganizApp
+gh repo clone saulTejedaM/KanEisen
 ````
-- Extract all files and excute "index.html" on your local server
 
 - **This project is already connected to a Firebase WEB application**
 
